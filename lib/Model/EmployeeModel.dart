@@ -1,12 +1,12 @@
 
 class EmployeeModel{
 
-   int id;
+   final int? id;
    String name;
    String surname;
    String secondSurname;
    DateTime beginning;
-   DateTime dismissal;
+   DateTime? dismissal;
    String phoneNumber;
 
    EmployeeModel({
@@ -32,8 +32,10 @@ class EmployeeModel{
        surname: json['surname'],
        secondSurname: json['secondSurname'],
        beginning: DateTime.parse(json['beginning']),
-       dismissal: DateTime.parse(json['dismissal']),
-       phoneNumber: json['phoneNumber'],
+       // dismissal: DateTime.parse(json['dismissal']),
+       dismissal: json['dismissal'] != null ? DateTime.parse(json['dismissal']) : null,
+
+     phoneNumber: json['phoneNumber'],
        email: json['email'],
        positionId: json['positionId'],
      );
@@ -41,5 +43,19 @@ class EmployeeModel{
 
    static List<EmployeeModel> fromJsonList(List<Map<String, dynamic>> jsonList) {
      return jsonList.map((json) => EmployeeModel.fromJson(json)).toList();
+   }
+
+   Map<String, dynamic> toJson() {
+     return {
+       'id': id,
+       'name': name,
+       'surname': surname,
+       'secondSurname': secondSurname,
+       'beginning': beginning.toIso8601String(),
+       'dismissal': dismissal?.toIso8601String(),
+       'phoneNumber': phoneNumber,
+       'email': email,
+       'positionId': positionId,
+     };
    }
 }
