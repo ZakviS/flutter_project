@@ -37,15 +37,15 @@ class PositionService{
     return position;
   }
 
-  String getPosition(int id){
+  PositionModel getPosition(int id){
 
       for(int i = 0;i<position.length;i++){
         if (position[i].id== id){
-          return position[i].name;
+          return position[i];
         }
       }
 
-    return "";
+    return position[0];
   }
 
 }

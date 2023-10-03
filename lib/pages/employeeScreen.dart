@@ -10,6 +10,8 @@ import 'package:flutter_project/pages/addEmolyeeScreen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import 'editEmployeeScreen.dart';
+
 
 class Employee extends StatefulWidget{
   const Employee({super.key});
@@ -68,7 +70,7 @@ class EmployeeState extends State<Employee>{
               key: Key(employeeList[i].name),
               child: Card(
                 child: ListTile(
-                    title: Text(employeeList[i].name + " " + positionService.getPosition(employeeList[i].positionId)),
+                    title: Text(employeeList[i].name + " " + positionService.getPosition(employeeList[i].positionId).name),
                   trailing: IconButton(
                     icon: const Icon(
                       Icons.delete,
@@ -144,7 +146,10 @@ class EmployeeState extends State<Employee>{
         );
       }
       else{
-
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => editEmployeeScreen(employee : employeeList[i])), // SecondScreen - ваша целевая страница
+            );
                 }
           },
             );
