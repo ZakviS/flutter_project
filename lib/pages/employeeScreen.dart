@@ -68,7 +68,7 @@ class EmployeeState extends State<Employee>{
               key: Key(employeeList[i].name),
               child: Card(
                 child: ListTile(
-                    title: Text(employeeList[i].name + " " + positionList.first.name),
+                    title: Text(employeeList[i].name + " " + positionService.getPosition(employeeList[i].positionId)),
                   trailing: IconButton(
                     icon: const Icon(
                       Icons.delete,

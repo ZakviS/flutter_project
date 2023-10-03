@@ -28,7 +28,7 @@ class PositionService{
 
     List<Map<String, dynamic>> parsedJson = jsonDecode(responseJson).cast<Map<String, dynamic>>();
     position = PositionModel.fromJsonList(parsedJson);
-
+    print(responseJson);
 
   }
 
@@ -37,5 +37,15 @@ class PositionService{
     return position;
   }
 
+  String getPosition(int id){
+
+      for(int i = 0;i<position.length;i++){
+        if (position[i].id== id){
+          return position[i].name;
+        }
+      }
+
+    return "";
+  }
 
 }
