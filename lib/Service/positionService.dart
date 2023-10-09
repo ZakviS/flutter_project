@@ -2,33 +2,25 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../Model/PositionModel.dart';
+import '../api/apiService.dart';
+
 
 class PositionService{
 
   String responseJson = "";
   List<PositionModel> position = [];
+  ApiService api = ApiService();
 
-  Future<void> fetchData(String token) async {
-    final url = Uri.parse('http://localhost:8080/position/all');
 
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': '$token',
-      },
-    );
+  Future<void> loadPosition() async {
 
-    if (response.statusCode == 200) {
-      responseJson = response.body;
+      responseJson = await api.getPosition();
       // print('Response data: ${response.body}');
-    } else {
-      print('Request failed with status: ${response.statusCode}');
-    }
-    // EmployeeSearchModel('', false, 0, 10, "dsc", "surname");
+
 
     List<Map<String, dynamic>> parsedJson = jsonDecode(responseJson).cast<Map<String, dynamic>>();
     position = PositionModel.fromJsonList(parsedJson);
-    print(responseJson);
+    // print(responseJson);
 
   }
 

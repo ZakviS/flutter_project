@@ -37,7 +37,7 @@ class addEmployeeState extends State<addEmployee> {
   }
 
   Future<void> fetchDataAndPrintName() async {
-    await positionService.fetchData("token");
+    await positionService.loadPosition();
 
     setState(() {
       positionList.addAll(positionService.getPositionList());
@@ -178,8 +178,8 @@ class addEmployeeState extends State<addEmployee> {
                 print('Email: $text5');
                 print('Дата приема: $date1');
                 print('Дата увольнения: $date2');
-                print('Должность: $dropdownValue');
-                EmployeeModel employee = EmployeeModel(id: null,name: text1, surname: text2, secondSurname: text3, beginning: date1, dismissal: date2, phoneNumber: text4, email: text5, positionId: selectedPosition!.id);
+                print('Должность: $selectedPosition');
+                EmployeeModel employee = EmployeeModel(id: null,name: text1, surname: text2, secondSurname: text3, beginning: date1, dismissal: date2, phoneNumber: text4, email: text5, positionId: 1);
                 employeeService.add("token", employee);
                 Navigator.push(
                   context,

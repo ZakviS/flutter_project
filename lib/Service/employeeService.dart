@@ -3,28 +3,18 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 import '../Model/EmployeeModel.dart';
+import '../api/apiService.dart';
 
 class EmployeeService{
 
   String responseJson = "";
   List<EmployeeModel> employees = [];
+  ApiService api = ApiService();
 
-  Future<void> fetchData(String token) async {
-    final url = Uri.parse('http://localhost:8080/employee/get');
+  Future<void> loadEmployee() async {
 
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': '$token',
-      },
-    );
+    responseJson = await api.getEmployee();
 
-    if (response.statusCode == 200) {
-       responseJson = response.body;
-    } else {
-      print('Request failed with status: ${response.statusCode}');
-
-    }
     // EmployeeSearchModel('', false, 0, 10, "dsc", "surname");
     List<Map<String, dynamic>> parsedJson = jsonDecode(responseJson).cast<Map<String, dynamic>>();
     employees = EmployeeModel.fromJsonList(parsedJson);
@@ -37,50 +27,22 @@ class EmployeeService{
     return employees;
   }
 
-  Future<void> delete(String token,int? id) async {
-    final url = Uri.parse('http://localhost:8080/employee/delete/$id');
-
-    final response = await http.delete(
-      url,
-      headers: {
-        'Authorization': '$token',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      responseJson = response.body;
-      // print('Response data: ${response.body}');
-    } else {
-      print('Request failed with status: ${response.statusCode}');
-    }
+  Future<void> delete(int? id) async {
+    await api.deleteEmployee(id);
     // EmployeeSearchModel('', false, 0, 10, "dsc", "surname");
 
 
   }
 
   Future<void> add(String token,EmployeeModel employeeModel) async {
-    final url = Uri.parse('http://localhost:8080/employee/add');
-    print(employeeModel.dismissal);
-    print(jsonEncode(employeeModel.toJson()));
-    final response = await http.post(
-      url,
-      headers: {
-        'Authorization': '$token',
-        'Content-Type': 'application/json', // Указываем тип контента как JSON
 
-      },
-      body: jsonEncode(employeeModel.toJson()), // Кодируем данные объекта в JSON
+      responseJson = await api.addEmployee(employeeModel);
 
-    );
+  }
 
-    if (response.statusCode == 201) {
-      responseJson = response.body;
-      // print('Response data: ${response.body}');
-    } else {
-      print('Request failed with status: ${response.statusCode}');
-    }
-    // EmployeeSearchModel('', false, 0, 10, "dsc", "surname");
+  Future<void> edit(String token,EmployeeModel employeeModel,int id) async {
 
+    responseJson = await api.editEmployee(employeeModel,id);
 
   }
 

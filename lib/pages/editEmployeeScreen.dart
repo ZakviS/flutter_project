@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/Model/PositionModel.dart';
 import 'package:flutter_project/Model/EmployeeModel.dart';
 import 'package:flutter_project/Model/EmployeeSearchModel.dart';
+import 'package:flutter_project/Model/SalaryModel.dart';
 import 'package:flutter_project/Service/employeeService.dart';
 import 'package:flutter_project/Service/positionService.dart';
+import 'package:flutter_project/Service/salaryService.dart';
 import 'package:flutter_project/pages/employeeScreen.dart';
+import 'package:flutter_project/pages/salaryEditScreen.dart';
 
 
 import 'dart:convert';
@@ -28,10 +31,14 @@ class editEmployeeScreen extends StatefulWidget {
 class editEmployeeState extends State<editEmployeeScreen> {
   final employeeService = EmployeeService();
   final positionService = PositionService();
+  final salaryService = SalaryService();
+
   List<PositionModel> positionList = [];
+  List<SalaryModel> salaryList = [];
   PositionModel? selectedPosition;
   EmployeeModel? employee;
 
+  //контроллеры для подставления текста в поля
   TextEditingController nameController = TextEditingController();
   TextEditingController surnameController = TextEditingController();
   TextEditingController secondSurnameController = TextEditingController();
@@ -42,7 +49,7 @@ class editEmployeeState extends State<editEmployeeScreen> {
   TextEditingController positionFieldController = TextEditingController();
 
 
-
+  //поля для сохранения сотрудников
   String text1 = '';
   String text2 = '';
   String text3 = '';
@@ -52,11 +59,24 @@ class editEmployeeState extends State<editEmployeeScreen> {
   DateTime? date2 = null ;
 
 
+
+  String salarySum = '';
+  String salaryNumb = '';
+  DateTime dateOfSalary = DateTime.now();
+  DateTime? dateOfSalOrder = DateTime.now() ;
+
+  TextEditingController salarySumController = TextEditingController();
+  DateTime salaryDateController = DateTime.now();
+  TextEditingController salaryNumbController = TextEditingController();
+  DateTime salaryDateOrderController = DateTime.now();
+
+
+
   @override
   void initState() {
     super.initState();
     employee = widget.employee;
-    fetchDataAndPrintName();
+    // fetchDataAndPrintName();
     initFields();
 
   }
@@ -76,15 +96,21 @@ class editEmployeeState extends State<editEmployeeScreen> {
   }
 
   Future<void> fetchDataAndPrintName() async {
-    await positionService.fetchData("token");
+    await positionService.loadPosition();
 
     positionList.clear();
+    // salaryList.clear();
 
     setState(() {
       positionList.addAll(positionService.getPositionList());
+
     });
 
     final employee = this.employee;
+    await salaryService.loadSalary(employee?.id);
+
+
+    salaryList.addAll(salaryService.getSalaryList());
     if (employee != null) {
        text1 = employee.name;
        text2 = employee.secondSurname;
@@ -97,17 +123,16 @@ class editEmployeeState extends State<editEmployeeScreen> {
   }
 
 
-
-
   @override
   Widget build(BuildContext context) {
 
-
     return Scaffold(
+
       appBar: AppBar(
         title: Text('Моя форма'),
       ),
       body: Padding(
+
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
@@ -197,7 +222,7 @@ class editEmployeeState extends State<editEmployeeScreen> {
                   // Обработка изменений в текстовом поле, если необходимо
                 },
                 decoration: InputDecoration(
-                  hintText: '${date1.toLocal()}'.split(' ')[0], // Начальное значение или подсказка
+                  hintText: '${date2?.toLocal()}'.split(' ')[0], // Начальное значение или подсказка
                   // Другие настройки внешнего вида, если необходимо
                 ),
               ),
@@ -235,19 +260,170 @@ class editEmployeeState extends State<editEmployeeScreen> {
                 );
               }).toList(),
             ),
-            // Кнопка для отправки данных (просто пример)
+
+
+
+
+
+      // Кнопка для отправки данных (просто пример)
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey, // Устанавливаем цвет кнопки
+                  ),
+                  child: Text('Отмена'),
+                ),
+                SizedBox(width: 30),
+                ElevatedButton(
+                  onPressed: () {
+                    // Здесь можно отправить данные на сервер или выполнить другие действия
+                    // Используйте значения text1, text2, и так далее
+                    print('Имя: $text1');
+                    print('Фамилия: $text2');
+                    print('Отчество: $text3');
+                    print('Телефон: $text4');
+                    print('Email: $text5');
+                    print('Дата приема: $date1');
+                    print('Дата увольнения: $date2');
+                    print(selectedPosition?.id);
+                    // EmployeeModel employee = EmployeeModel(id: 1,name: text1, surname: text2, secondSurname: text3, beginning: date1, dismissal: date2, phoneNumber: text4, email: text5, positionId: selectedPosition!.id);
+                    // employeeService.add("token", employee);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
+                    );
+                    // Navigator.pushNamed(context, '/employee',);
+                    // Future.delayed(Duration.zero, () {});
+
+                  },
+                  child: Text('Отправить данные'),
+                ),
+                 // Пространство между кнопками
+
+              ],
+            ),
+
+
+
+            SizedBox(height: 16),
+            const Text(
+              "Зарплата",
+              // Указываем стиль текста с увеличенным размером шрифта
+              style: TextStyle(
+                fontSize: 15, // Устанавливаем размер шрифта в пунктах
+                fontWeight: FontWeight.bold, // Жирный стиль текста (по желанию)
+                // Другие настройки стиля текста, если необходимо
+              ),
+            ),
+
+        Row(
+          children: [
+            Container(
+              width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+              child: TextFormField(
+                controller: salarySumController,
+                onChanged: (value) {
+                  setState(() {
+                    salarySum = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Введите текст',
+                ),
+
+              ),
+            ),
+            SizedBox(width: 16.0),// Добавьте отступ между элементами
+            Container(
+              width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+              child: GestureDetector(
+
+                onTap: () async {
+                  final DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2101),
+                  );
+                  if ( pickedDate != dateOfSalary)
+                    setState(() {
+                      dateOfSalary = pickedDate!;
+                      salaryDateController = pickedDate!;
+                    });
+                },
+                child: ListTile(
+                  title: Text('Дата принятия'),
+                  subtitle: Text('${salaryDateController.toLocal()}'.split(' ')[0]),
+                  trailing: Icon(Icons.calendar_today),
+                ),
+              ),
+            ),
+
+          ],
+        ),
+            Row(
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                  child: TextFormField(
+                    controller: salaryNumbController,
+                    onChanged: (value) {
+                      setState(() {
+                        salaryNumb = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Введите текст',
+                    ),
+
+                  ),
+                ),
+                SizedBox(width: 16.0),// Добавьте отступ между элементами
+                Container(
+                  width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                  child: GestureDetector(
+
+                    onTap: () async {
+                      final DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2101),
+                      );
+                      if ( pickedDate != dateOfSalOrder)
+                        setState(() {
+                          dateOfSalOrder = pickedDate!;
+                          salaryDateOrderController = pickedDate;
+                        });
+                    },
+                    child: ListTile(
+                      title: Text('Дата принятия'),
+                      subtitle: Text('${salaryDateOrderController.toLocal()}'.split(' ')[0]),
+                      trailing: Icon(Icons.calendar_today),
+                    ),
+                  ),
+                ),
+
+              ],
+            ),
             ElevatedButton(
               onPressed: () {
                 // Здесь можно отправить данные на сервер или выполнить другие действия
                 // Используйте значения text1, text2, и так далее
-                print('Имя: $text1');
-                print('Фамилия: $text2');
-                print('Отчество: $text3');
-                print('Телефон: $text4');
-                print('Email: $text5');
-                print('Дата приема: $date1');
-                print('Дата увольнения: $date2');
-                print(selectedPosition?.id);
+                print('Имя: $salarySum');
+                print('Фамилия: $salaryNumb');
+                print('Отчество: $dateOfSalary');
+                print('Телефон: $dateOfSalOrder');
+
                 // EmployeeModel employee = EmployeeModel(id: 1,name: text1, surname: text2, secondSurname: text3, beginning: date1, dismissal: date2, phoneNumber: text4, email: text5, positionId: selectedPosition!.id);
                 // employeeService.add("token", employee);
                 Navigator.push(
@@ -260,6 +436,63 @@ class editEmployeeState extends State<editEmployeeScreen> {
               },
               child: Text('Отправить данные'),
             ),
+            PopupMenuButton<String>(
+              onSelected: (String value) {
+                // setState(() {
+                //   selectedValue = value; // Обновляем выбранное значение
+                // });
+              },
+              itemBuilder: (BuildContext context) {
+                return salaryList.map((SalaryModel salary) {
+                  return PopupMenuItem<String>(
+                    value: salary.numbOfOrder.toString(), // Предположим, что у SalaryModel есть поле someValue
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("номер приказа: " + salary.numbOfOrder.toString() ), // Отображаем название элемента
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit), // Кнопка редактирования
+                              onPressed: () async {
+                                final SalaryModel result = await showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return EditPopup(id: employee?.id);
+                                  },
+                                );
+                                if (result != null) {
+                                  // Вот ваш код после закрытия всплывающего окна с результатом.
+                                  // Например, можно обновить состояние родительского виджета с полученными данными.
+                                  setState(() {
+                                    // Обновите состояние с полученными данными из всплывающего окна.
+                                    // Например, вы можете использовать эти данные для перерисовки или обновления виджета.
+                                    salary.sum = result.sum;
+                                    salary.numbOfOrder = result.numbOfOrder;
+                                    salary.dateOfSalary = result.dateOfSalary;
+                                    salary.dateOfOrder = result.dateOfOrder;
+
+                                    // ... остальные данные ...
+                                  });
+                                }
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete), // Кнопка удаления
+                              onPressed: () {
+                                // Обработчик нажатия на кнопку удаления
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList();
+              },
+              child: Text("Посмотреть историю"), // Текст кнопки
+            )
+
           ],
         ),
       ),
