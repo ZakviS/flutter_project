@@ -53,8 +53,19 @@ class addEmployeeState extends State<addEmployee> {
   @override
   Widget build(BuildContext context) {
 
-
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async {
+      // Ваш код для определения действия при нажатии кнопки "назад"
+      // Например, перенаправление на определенный экран:
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => Employee(), // Замените YourTargetScreen на целевой экран
+        ),
+      );
+      // Возвращаем false, чтобы предотвратить обычное закрытие экрана "назад"
+      return false;
+    },
+    child: Scaffold(
       appBar: AppBar(
         title: Text('Моя форма'),
       ),
@@ -190,6 +201,7 @@ class addEmployeeState extends State<addEmployee> {
           ],
         ),
       ),
+    ),
     );
   }
 }

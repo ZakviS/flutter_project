@@ -3,9 +3,10 @@ import 'package:flutter_project/Model/EmployeeModel.dart';
 import 'package:flutter_project/Model/PositionModel.dart';
 import 'package:flutter_project/Service/employeeService.dart';
 import 'package:flutter_project/Service/positionService.dart';
-import 'package:flutter_project/pages/addEmolyeeScreen.dart';
+import 'package:flutter_project/pages/addEmployeeScreen.dart';
 
 
+import '../main.dart';
 import 'editEmployeeScreen.dart';
 
 
@@ -39,7 +40,7 @@ class EmployeeState extends State<Employee>{
     await positionService.loadPosition();
 
     setState(() {
-      employeeList.addAll(employeeService.getEmployeeList());// Обновляем список после получения данных
+      employeeList.addAll(employeeService.getEmployeeList());
       positionList.addAll(positionService.getPositionList());
     });
   }
@@ -48,26 +49,73 @@ class EmployeeState extends State<Employee>{
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Штат'),
-        centerTitle: true,
-      ),
-      body: ListView.builder(
-        itemCount: employeeList.length,
-        itemBuilder: (BuildContext context, int i){
-          return Dismissible(
-              key: Key(employeeList[i].name),
-              child: Card(
-                child: ListTile(
+
+    return WillPopScope(
+      onWillPop: () async {
+        // Ваш код для определения действия при нажатии кнопки "назад"
+        // Например, перенаправление на определенный экран:
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => AppBarApp(), // Замените YourTargetScreen на целевой экран
+          ),
+        );
+        // Возвращаем false, чтобы предотвратить обычное закрытие экрана "назад"
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Штат'),
+          centerTitle: true,
+        ),
+        body: ListView.builder(
+            itemCount: employeeList.length,
+            itemBuilder: (BuildContext context, int i){
+              return Dismissible(
+                key: Key(employeeList[i].name),
+                child: Card(
+                  child: ListTile(
                     title: Text(employeeList[i].name + " " + positionService.getPosition(employeeList[i].positionId).name),
-                  trailing: IconButton(
-                    icon: const Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                    ), onPressed: () {
-                    // print(employeeList[i].id);
-                    // employeeService.delete(employeeList[i].id);
+                    trailing: IconButton(
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                      ), onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Подтвердите удаление'),
+                            content: Text('Вы уверены, что хотите удалить этого сотрудника?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(); // Закрыть диалог
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
+                                  // );
+                                },
+                                child: Text('Отмена'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  // Вызов метода удаления после подтверждения
+                                  print(employeeList[i].id);
+                                  // employeeService.delete(employeeList[i].id);
+                                  Navigator.of(context).pop(); // Закрыть диалог
+                                },
+                                child: Text('Удалить'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    ) ,
+                  ),
+                ),
+                onDismissed: (direction) {
+                  if (direction == DismissDirection.endToStart) {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
@@ -78,10 +126,10 @@ class EmployeeState extends State<Employee>{
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop(); // Закрыть диалог
-                                // Navigator.push(
-                                //   context,
-                                //   MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
-                                // );
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
+                                );
                               },
                               child: Text('Отмена'),
                             ),
@@ -98,70 +146,36 @@ class EmployeeState extends State<Employee>{
                         );
                       },
                     );
-                  },
-                  ) ,
-                ),
-             ),
-    onDismissed: (direction) {
-      if (direction == DismissDirection.endToStart) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Подтвердите удаление'),
-              content: Text('Вы уверены, что хотите удалить этого сотрудника?'),
-              actions: [
-                TextButton(
-                 onPressed: () {
-                   Navigator.of(context).pop(); // Закрыть диалог
-                   Navigator.push(
-                     context,
-                     MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
-                   );
+                  }
+                  else{
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => editEmployeeScreen(employee : employeeList[i])), // SecondScreen - ваша целевая страница
+                    );
+                  }
                 },
-                child: Text('Отмена'),
-            ),
-            TextButton(
-              onPressed: () {
-              // Вызов метода удаления после подтверждения
-                print(employeeList[i].id);
-                // employeeService.delete(employeeList[i].id);
-                Navigator.of(context).pop(); // Закрыть диалог
-                },
-              child: Text('Удалить'),
-              ),
-            ],
-          );
-        },
-        );
-      }
-      else{
+              );
+            }
+        ),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.blue,
+          onPressed: (){
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => editEmployeeScreen(employee : employeeList[i])), // SecondScreen - ваша целевая страница
+              MaterialPageRoute(builder: (context) => addEmployee()), // SecondScreen - ваша целевая страница
             );
-                }
+
           },
-            );
-          }
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
-        onPressed: (){
-          print(positionList.length);
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => addEmployee()), // SecondScreen - ваша целевая страница
-          );
+          child: Icon(
+            Icons.add,
 
-        },
-        child: Icon(
-          Icons.add,
-
+          ),
         ),
-      ),
+
+      )
 
     );
+
 
   }
   

@@ -1,22 +1,24 @@
 
 import 'package:flutter/material.dart';
-import 'package:flutter_project/Model/PremiumModel.dart';
-import 'package:flutter_project/Service/premiumService.dart';
+import 'package:flutter_project/Model/AllowanceModel.dart';
+import 'package:flutter_project/Model/SalaryModel.dart';
+import 'package:flutter_project/Service/allowanceService.dart';
+import 'package:flutter_project/Service/salaryService.dart';
 
-class EditPremiumPopup extends StatefulWidget {
+class EditAllowancePopup extends StatefulWidget {
 
   final int? id;
-  const EditPremiumPopup({Key? key, required this.id}) : super(key: key);
+  const EditAllowancePopup({Key? key, required this.id}) : super(key: key);
 
 
   @override
   _EditPopupState createState() => _EditPopupState();
 }
 
-class _EditPopupState extends State<EditPremiumPopup> {
-  final premiumService = PremiumService();
+class _EditPopupState extends State<EditAllowancePopup> {
+  final allowanceService = AllowanceService();
   int? id;
-  PremiumModel? premium;
+  AllowanceModel? allowance;
 
   int? text1 ;
   int? text2 ;
@@ -42,32 +44,32 @@ class _EditPopupState extends State<EditPremiumPopup> {
 
   Future<void> initFields() async {
     await fetchDataAndPrintName();
-    if (premium != null) {
-      textController1.text = premium!.sum.toString();
-      textController2.text = premium!.numbOfOrder.toString();
+    if (allowance != null) {
+      textController1.text = allowance!.sum.toString();
+      textController2.text = allowance!.numbOfOrder.toString();
 
-      date1Controller.text = '${premium!.dateOfSalary?.toLocal()}'.split(' ')[0];
-      date2Controller.text = '${premium!.dateOfOrder?.toLocal()}'.split(' ')[0];
+      date1Controller.text = '${allowance!.dateOfSalary?.toLocal()}'.split(' ')[0];
+      date2Controller.text = '${allowance!.dateOfOrder?.toLocal()}'.split(' ')[0];
     }
   }
 
   Future<void> fetchDataAndPrintName() async {
-    await premiumService.loadPremium(id);
+    await allowanceService.loadAllowance(id);
 
     // salaryList.clear();
 
     setState(() {
-      this.premium = premiumService.getPremium(id!);
+      this.allowance = allowanceService.getAllowance(id!);
       // print(salary?.sum);
     });
 
 
-    final salary = this.premium;
-    if (salary != null) {
-      text1 = salary.sum;
-      text2 = salary.numbOfOrder;
-      date1 = salary.dateOfSalary;
-      date2 = salary.dateOfOrder ;
+    final allowance = this.allowance;
+    if (allowance != null) {
+      text1 = allowance.sum;
+      text2 = allowance.numbOfOrder;
+      date1 = allowance.dateOfSalary;
+      date2 = allowance.dateOfOrder ;
     }
   }
 
@@ -145,8 +147,8 @@ class _EditPopupState extends State<EditPremiumPopup> {
         ElevatedButton(
           onPressed: () {
             // Обработчик нажатия на кнопку сохранения
-            premiumService.edit("token", PremiumModel(id: premium!.id, sum: text1, dateOfSalary: date1, numbOfOrder: text2, dateOfOrder: date2, employeeId: premium?.employeeId), 5);
-            final result = PremiumModel(id: premium!.id, sum: text1, dateOfSalary: date1, numbOfOrder: text2, dateOfOrder: date2, employeeId: premium?.employeeId);
+            allowanceService.edit("token", AllowanceModel(id: allowance!.id, sum: text1, dateOfSalary: date1, numbOfOrder: text2, dateOfOrder: date2, employeeId: allowance?.employeeId), 5);
+            final result = SalaryModel(id: allowance!.id, sum: text1, dateOfSalary: date1, numbOfOrder: text2, dateOfOrder: date2, employeeId: allowance?.employeeId);
             Navigator.of(context).pop(result);
 
           },

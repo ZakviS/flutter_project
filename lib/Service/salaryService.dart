@@ -42,7 +42,6 @@ class SalaryService{
 
   Future<void> delete(int? id) async {
     await api.deleteSalary(id);
-    // EmployeeSearchModel('', false, 0, 10, "dsc", "surname");
 
 
   }

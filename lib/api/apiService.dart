@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter_project/Model/AllowanceModel.dart';
 import 'package:flutter_project/Model/PremiumModel.dart';
 import 'package:flutter_project/Model/SalaryModel.dart';
 import 'package:http/http.dart' as http;
@@ -80,10 +81,9 @@ class ApiService{
 
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       return response.body;
     } else {
-      print('Request failed with status: ${response.statusCode}');
       throw Exception('Request failed with status: ${response.statusCode}');
     }
   }
@@ -263,4 +263,81 @@ class ApiService{
     }
   }
 
+  Future<String> getAllowance(int ?id) async {
+    final url = Uri.parse('$baseUrl/premium/get/$id');
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': '$token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Request failed with status: ${response.statusCode}');
+    }
+  }
+
+  Future<void> deleteAllowance(int? id) async {
+    final url = Uri.parse('$baseUrl/premium/delete/$id');
+
+    final response = await http.delete(
+      url,
+      headers: {
+        'Authorization': '$token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      print('Response data: ${response.body}');
+    } else {
+      print('Request failed with status: ${response.statusCode}');
+    }
+  }
+
+  Future<String> addAllowance(AllowanceModel allowanceModel) async {
+    final url = Uri.parse('$baseUrl/premium/add');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': '$token',
+        'Content-Type': 'application/json',
+
+      },
+      body: jsonEncode(allowanceModel.toJson()),
+
+    );
+
+    if (response.statusCode == 201) {
+      return response.body;
+    } else {
+      print('Request failed with status: ${response.statusCode}');
+      throw Exception('Request failed with status: ${response.statusCode}');
+    }
+  }
+
+  Future<String> editAllowance(AllowanceModel allowanceModel,int id) async {
+    final url = Uri.parse('$baseUrl/premium/edit/$id');
+
+    final response = await http.put(
+      url,
+      headers: {
+        'Authorization': '$token',
+        'Content-Type': 'application/json',
+
+      },
+      body: jsonEncode(allowanceModel.toJson()),
+
+    );
+
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      print('Request failed with status: ${response.statusCode}');
+      throw Exception('Request failed with status: ${response.statusCode}');
+    }
+  }
 }

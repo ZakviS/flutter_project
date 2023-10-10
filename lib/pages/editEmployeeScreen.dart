@@ -1,9 +1,11 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_project/Model/AllowanceModel.dart';
 import 'package:flutter_project/Model/PositionModel.dart';
 import 'package:flutter_project/Model/EmployeeModel.dart';
 import 'package:flutter_project/Model/SalaryModel.dart';
-import 'package:flutter_project/Service/PremiumService.dart';
+import 'package:flutter_project/Service/allowanceService.dart';
+import 'package:flutter_project/Service/premiumService.dart';
 import 'package:flutter_project/Service/employeeService.dart';
 import 'package:flutter_project/Service/positionService.dart';
 import 'package:flutter_project/Service/salaryService.dart';
@@ -14,6 +16,7 @@ import 'package:flutter_project/pages/salaryEditScreen.dart';
 
 
 import '../Model/PremiumModel.dart';
+import 'allowanceEditScreen.dart';
 
 
 class editEmployeeScreen extends StatefulWidget {
@@ -34,10 +37,13 @@ class editEmployeeState extends State<editEmployeeScreen> {
   final positionService = PositionService();
   final salaryService = SalaryService();
   final premiumService = PremiumService();
+  final allowanceService = AllowanceService();
+
 
   List<PositionModel> positionList = [];
   List<SalaryModel> salaryList = [];
   List<PremiumModel> premiumList = [];
+  List<AllowanceModel> allowanceList = [];
   PositionModel? selectedPosition;
   EmployeeModel? employee;
 
@@ -73,10 +79,20 @@ class editEmployeeState extends State<editEmployeeScreen> {
   DateTime dateOfPremium = DateTime.now();
   DateTime? dateOfPremOrder = DateTime.now() ;
 
+  String allowanceSum = '';
+  String allowanceNumb = '';
+  DateTime dateOfAllowance = DateTime.now();
+  DateTime? dateOfAllowOrder = DateTime.now() ;
+
   TextEditingController salarySumController = TextEditingController();
   DateTime salaryDateController = DateTime.now();
   TextEditingController salaryNumbController = TextEditingController();
   DateTime salaryDateOrderController = DateTime.now();
+
+  TextEditingController allowanceSumController = TextEditingController();
+  DateTime allowanceDateController = DateTime.now();
+  TextEditingController allowanceNumbController = TextEditingController();
+  DateTime allowanceDateOrderController = DateTime.now();
 
   TextEditingController premiumSumController = TextEditingController();
   DateTime premiumDateController = DateTime.now();
@@ -140,177 +156,306 @@ class editEmployeeState extends State<editEmployeeScreen> {
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
-
-      appBar: AppBar(
-        title: Text('Моя форма'),
-      ),
-      body: Padding(
-
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            // Поле ввода текста 1
-            TextFormField(
-            controller: nameController,
-              onChanged: (value) {
-                setState(() {
-                  text1 = value;
-                });
-              },
-              decoration: InputDecoration(labelText: 'Имя'),
+    return WillPopScope(
+        onWillPop: () async {
+          // Ваш код для определения действия при нажатии кнопки "назад"
+          // Например, перенаправление на определенный экран:
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => Employee(), // Замените YourTargetScreen на целевой экран
             ),
-            // Поле ввода текста 2
-            TextFormField(
-              controller: surnameController,
-              onChanged: (value) {
-                setState(() {
-                  text2 = value;
-                });
-              },
-              decoration: InputDecoration(labelText: 'Фамилия'),
-            ),
-            // Поле ввода текста 3
-            TextFormField(
-              controller: secondSurnameController,
-              onChanged: (value) {
-                setState(() {
-                  text3 = value;
-                });
-              },
-              decoration: InputDecoration(labelText: 'Отчество'),
-            ),
-            // Поле ввода текста 4
-            TextFormField(
-              controller: phoneNumberController,
-              onChanged: (value) {
-                setState(() {
-                  text4 = value;
-                });
-              },
-              decoration: InputDecoration(labelText: 'Телефон'),
-            ),
-            // Поле ввода текста 5
-            TextFormField(
-              controller: emailController,
-              onChanged: (value) {
-                setState(() {
-                  text5 = value;
-                });
-              },
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            // Поле выбора даты 1
-            ListTile(
-              title: Text('Дата принятия'),
-              subtitle: TextFormField(
-                controller: beginningFieldController, // Свяжите контроллер с TextFormField
-                onChanged: (value) {
-                  // Обработка изменений в текстовом поле, если необходимо
-                },
-                decoration: InputDecoration(
-                  hintText: '${date1.toLocal()}'.split(' ')[0], // Начальное значение или подсказка
-                  // Другие настройки внешнего вида, если необходимо
-                ),
-              ),
-              trailing: Icon(Icons.keyboard_arrow_down),
-              onTap: () async {
-                final DateTime? pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: date1,
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2101),
-                );
-                if (pickedDate != null && pickedDate != date1)
-                  setState(() {
-                    date1 = pickedDate;
-                  });
-              },
-            ),
-            // Поле выбора даты 2
-            ListTile(
-              title: Text('Дата увольнения'),
-              subtitle: TextFormField(
-                controller: dismissalFieldController, // Свяжите контроллер с TextFormField
-                onChanged: (value) {
-                  // Обработка изменений в текстовом поле, если необходимо
-                },
-                decoration: InputDecoration(
-                  hintText: '${date2?.toLocal()}'.split(' ')[0], // Начальное значение или подсказка
-                  // Другие настройки внешнего вида, если необходимо
-                ),
-              ),
-              trailing: Icon(Icons.keyboard_arrow_down),
-              onTap: () async {
-                final DateTime? pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2101),
-                );
-                if ( pickedDate != date2)
-                  setState(() {
-                    date2 = pickedDate;
-                  });
-              },
-            ),
-            // Выпадающий список
+          );
+          // Возвращаем false, чтобы предотвратить обычное закрытие экрана "назад"
+          return false;
+        },
+        child:Scaffold(
 
-            DropdownButton<PositionModel>(
-              value: selectedPosition,
+          appBar: AppBar(
+            title: const Text('Моя форма'),
+          ),
+          body: Padding(
 
-              onChanged: (PositionModel? newValue) { // Обратите внимание на тип String?
-                if (newValue != null) { // Проверка на null
-                  setState(() {
-                    selectedPosition = newValue;
-                  });
-                }
-              },
-
-              items: positionList.map<DropdownMenuItem<PositionModel>>((PositionModel position) {
-                return DropdownMenuItem<PositionModel>(
-                  value: position,
-                  child: Text(position.name),
-                );
-              }).toList(),
-            ),
-
-
-
-
-
-      // Кнопка для отправки данных (просто пример)
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            padding: const EdgeInsets.all(16.0),
+            child: ListView(
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
-                    );
+                // Поле ввода текста 1
+                TextFormField(
+                  controller: nameController,
+                  onChanged: (value) {
+                    setState(() {
+                      text1 = value;
+                    });
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey, // Устанавливаем цвет кнопки
-                  ),
-                  child: Text('Отмена'),
+                  decoration: InputDecoration(labelText: 'Имя'),
                 ),
-                SizedBox(width: 30),
+                // Поле ввода текста 2
+                TextFormField(
+                  controller: surnameController,
+                  onChanged: (value) {
+                    setState(() {
+                      text2 = value;
+                    });
+                  },
+                  decoration: InputDecoration(labelText: 'Фамилия'),
+                ),
+                // Поле ввода текста 3
+                TextFormField(
+                  controller: secondSurnameController,
+                  onChanged: (value) {
+                    setState(() {
+                      text3 = value;
+                    });
+                  },
+                  decoration: InputDecoration(labelText: 'Отчество'),
+                ),
+                // Поле ввода текста 4
+                TextFormField(
+                  controller: phoneNumberController,
+                  onChanged: (value) {
+                    setState(() {
+                      text4 = value;
+                    });
+                  },
+                  decoration: InputDecoration(labelText: 'Телефон'),
+                ),
+                // Поле ввода текста 5
+                TextFormField(
+                  controller: emailController,
+                  onChanged: (value) {
+                    setState(() {
+                      text5 = value;
+                    });
+                  },
+                  decoration: InputDecoration(labelText: 'Email'),
+                ),
+                // Поле выбора даты 1
+                ListTile(
+                  title: Text('Дата принятия'),
+                  subtitle: TextFormField(
+                    controller: beginningFieldController, // Свяжите контроллер с TextFormField
+                    onChanged: (value) {
+                      // Обработка изменений в текстовом поле, если необходимо
+                    },
+                    decoration: InputDecoration(
+                      hintText: '${date1.toLocal()}'.split(' ')[0], // Начальное значение или подсказка
+                      // Другие настройки внешнего вида, если необходимо
+                    ),
+                  ),
+                  trailing: Icon(Icons.keyboard_arrow_down),
+                  onTap: () async {
+                    final DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: date1,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2101),
+                    );
+                    if (pickedDate != null && pickedDate != date1)
+                      setState(() {
+                        date1 = pickedDate;
+                      });
+                  },
+                ),
+                // Поле выбора даты 2
+                ListTile(
+                  title: Text('Дата увольнения'),
+                  subtitle: TextFormField(
+                    controller: dismissalFieldController, // Свяжите контроллер с TextFormField
+                    onChanged: (value) {
+                      // Обработка изменений в текстовом поле, если необходимо
+                    },
+                    decoration: InputDecoration(
+                      hintText: '${date2?.toLocal()}'.split(' ')[0], // Начальное значение или подсказка
+                      // Другие настройки внешнего вида, если необходимо
+                    ),
+                  ),
+                  trailing: Icon(Icons.keyboard_arrow_down),
+                  onTap: () async {
+                    final DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2101),
+                    );
+                    if ( pickedDate != date2)
+                      setState(() {
+                        date2 = pickedDate;
+                      });
+                  },
+                ),
+                // Выпадающий список
+
+                DropdownButton<PositionModel>(
+                  value: selectedPosition,
+
+                  onChanged: (PositionModel? newValue) { // Обратите внимание на тип String?
+                    if (newValue != null) { // Проверка на null
+                      setState(() {
+                        selectedPosition = newValue;
+                      });
+                    }
+                  },
+
+                  items: positionList.map<DropdownMenuItem<PositionModel>>((PositionModel position) {
+                    return DropdownMenuItem<PositionModel>(
+                      value: position,
+                      child: Text(position.name),
+                    );
+                  }).toList(),
+                ),
+
+                // Кнопка для отправки данных (просто пример)
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey, // Устанавливаем цвет кнопки
+                      ),
+                      child: Text('Отмена'),
+                    ),
+                    SizedBox(width: 30),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Здесь можно отправить данные на сервер или выполнить другие действия
+                        // Используйте значения text1, text2, и так далее
+
+                        EmployeeModel employee = EmployeeModel(id: this.employee?.id,name: text1, surname: text2, secondSurname: text3, beginning: date1, dismissal: date2, phoneNumber: text4, email: text5, positionId: selectedPosition!.id);
+                        employeeService.edit("token", employee,5);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
+                        );
+
+                      },
+                      child: Text('Отправить данные'),
+                    ),
+                    // Пространство между кнопками
+
+                  ],
+                ),
+
+
+                //salary
+                SizedBox(height: 30),
+                const Text(
+                  "Зарплата",
+                  // Указываем стиль текста с увеличенным размером шрифта
+                  style: TextStyle(
+                    fontSize: 15, // Устанавливаем размер шрифта в пунктах
+                    fontWeight: FontWeight.bold, // Жирный стиль текста (по желанию)
+                    // Другие настройки стиля текста, если необходимо
+                  ),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                      child: TextFormField(
+                        controller: salarySumController,
+                        onChanged: (value) {
+                          setState(() {
+                            salarySum = value;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Сумма зарплаты',
+                        ),
+
+                      ),
+                    ),
+                    SizedBox(width: 16.0),// Добавьте отступ между элементами
+                    Container(
+                      width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                      child: GestureDetector(
+
+                        onTap: () async {
+                          final DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2101),
+                          );
+                          if ( pickedDate != dateOfSalary) {
+                            setState(() {
+                              dateOfSalary = pickedDate!;
+                              salaryDateController = pickedDate!;
+                            });
+                          }
+                        },
+                        child: ListTile(
+                          title: Text('Дата зарплаты'),
+                          subtitle: Text('${salaryDateController.toLocal()}'.split(' ')[0]),
+                          trailing: Icon(Icons.calendar_today),
+                        ),
+                      ),
+                    ),
+
+                  ],
+                ),
+                Row(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                      child: TextFormField(
+                        controller: salaryNumbController,
+                        onChanged: (value) {
+                          setState(() {
+                            salaryNumb = value;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Введите текст',
+                        ),
+
+                      ),
+                    ),
+                    SizedBox(width: 16.0),// Добавьте отступ между элементами
+                    Container(
+                      width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                      child: GestureDetector(
+
+                        onTap: () async {
+                          final DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2101),
+                          );
+                          if ( pickedDate != dateOfSalOrder) {
+                            setState(() {
+                              dateOfSalOrder = pickedDate!;
+                              salaryDateOrderController = pickedDate;
+                            });
+                          }
+                        },
+                        child: ListTile(
+                          title: Text('Дата принятия'),
+                          subtitle: Text('${salaryDateOrderController.toLocal()}'.split(' ')[0]),
+                          trailing: Icon(Icons.calendar_today),
+                        ),
+                      ),
+                    ),
+
+                  ],
+                ),
                 ElevatedButton(
                   onPressed: () {
                     // Здесь можно отправить данные на сервер или выполнить другие действия
                     // Используйте значения text1, text2, и так далее
-                    print('Имя: $text1');
-                    print('Фамилия: $text2');
-                    print('Отчество: $text3');
-                    print('Телефон: $text4');
-                    print('Email: $text5');
-                    print('Дата приема: $date1');
-                    print('Дата увольнения: $date2');
-                    print(selectedPosition?.id);
-                    // EmployeeModel employee = EmployeeModel(id: 1,name: text1, surname: text2, secondSurname: text3, beginning: date1, dismissal: date2, phoneNumber: text4, email: text5, positionId: selectedPosition!.id);
-                    // employeeService.add("token", employee);
+                    print('Имя: $salarySum');
+                    print('Фамилия: $salaryNumb');
+                    print('Отчество: $dateOfSalary');
+                    print('Телефон: $dateOfSalOrder');
+
+                    salaryService.add("token", SalaryModel(id: null, sum: int.tryParse(salarySum), dateOfSalary: dateOfSalary, numbOfOrder: int.tryParse(salaryNumb), dateOfOrder: dateOfSalOrder, employeeId: employee?.id));
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
@@ -321,373 +466,423 @@ class editEmployeeState extends State<editEmployeeScreen> {
                   },
                   child: Text('Отправить данные'),
                 ),
-                 // Пространство между кнопками
-
-              ],
-            ),
-
-
-
-            SizedBox(height: 16),
-            const Text(
-              "Зарплата",
-              // Указываем стиль текста с увеличенным размером шрифта
-              style: TextStyle(
-                fontSize: 15, // Устанавливаем размер шрифта в пунктах
-                fontWeight: FontWeight.bold, // Жирный стиль текста (по желанию)
-                // Другие настройки стиля текста, если необходимо
-              ),
-            ),
-
-        Row(
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
-              child: TextFormField(
-                controller: salarySumController,
-                onChanged: (value) {
-                  setState(() {
-                    salarySum = value;
-                  });
-                },
-                decoration: InputDecoration(
-                  hintText: 'Сумма зарплаты',
-                ),
-
-              ),
-            ),
-            SizedBox(width: 16.0),// Добавьте отступ между элементами
-            Container(
-              width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
-              child: GestureDetector(
-
-                onTap: () async {
-                  final DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2101),
-                  );
-                  if ( pickedDate != dateOfSalary)
-                    setState(() {
-                      dateOfSalary = pickedDate!;
-                      salaryDateController = pickedDate!;
-                    });
-                },
-                child: ListTile(
-                  title: Text('Дата зарплаты'),
-                  subtitle: Text('${salaryDateController.toLocal()}'.split(' ')[0]),
-                  trailing: Icon(Icons.calendar_today),
-                ),
-              ),
-            ),
-
-          ],
-        ),
-            Row(
-              children: [
-                Container(
-                  width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
-                  child: TextFormField(
-                    controller: salaryNumbController,
-                    onChanged: (value) {
-                      setState(() {
-                        salaryNumb = value;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Введите текст',
-                    ),
-
-                  ),
-                ),
-                SizedBox(width: 16.0),// Добавьте отступ между элементами
-                Container(
-                  width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
-                  child: GestureDetector(
-
-                    onTap: () async {
-                      final DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2101),
-                      );
-                      if ( pickedDate != dateOfSalOrder)
-                        setState(() {
-                          dateOfSalOrder = pickedDate!;
-                          salaryDateOrderController = pickedDate;
-                        });
-                    },
-                    child: ListTile(
-                      title: Text('Дата принятия'),
-                      subtitle: Text('${salaryDateOrderController.toLocal()}'.split(' ')[0]),
-                      trailing: Icon(Icons.calendar_today),
-                    ),
-                  ),
-                ),
-
-              ],
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Здесь можно отправить данные на сервер или выполнить другие действия
-                // Используйте значения text1, text2, и так далее
-                print('Имя: $salarySum');
-                print('Фамилия: $salaryNumb');
-                print('Отчество: $dateOfSalary');
-                print('Телефон: $dateOfSalOrder');
-
-                salaryService.add("token", SalaryModel(id: null, sum: int.tryParse(salarySum), dateOfSalary: dateOfSalary, numbOfOrder: int.tryParse(salaryNumb), dateOfOrder: dateOfSalOrder, employeeId: employee?.id));
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
-                );
-                // Navigator.pushNamed(context, '/employee',);
-                // Future.delayed(Duration.zero, () {});
-
-              },
-              child: Text('Отправить данные'),
-            ),
-            PopupMenuButton<String>(
-              onSelected: (String value) {
-                // setState(() {
-                //   selectedValue = value; // Обновляем выбранное значение
-                // });
-              },
-              itemBuilder: (BuildContext context) {
-                return salaryList.map((SalaryModel salary) {
-                  return PopupMenuItem<String>(
-                    value: salary.numbOfOrder.toString(), // Предположим, что у SalaryModel есть поле someValue
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("номер приказа: " + salary.numbOfOrder.toString() ), // Отображаем название элемента
-                        Row(
+                PopupMenuButton<String>(
+                  onSelected: (String value) {
+                    // setState(() {
+                    //   selectedValue = value; // Обновляем выбранное значение
+                    // });
+                  },
+                  itemBuilder: (BuildContext context) {
+                    return salaryList.map((SalaryModel salary) {
+                      return PopupMenuItem<String>(
+                        value: salary.numbOfOrder.toString(), // Предположим, что у SalaryModel есть поле someValue
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            IconButton(
-                              icon: Icon(Icons.edit), // Кнопка редактирования
-                              onPressed: () async {
-                                final SalaryModel result = await showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return EditSalaryPopup(id: employee?.id);
-                                  },
-                                );
-                                if (result != null) {
-                                  // Вот ваш код после закрытия всплывающего окна с результатом.
-                                  // Например, можно обновить состояние родительского виджета с полученными данными.
-                                  setState(() {
-                                    // Обновите состояние с полученными данными из всплывающего окна.
-                                    // Например, вы можете использовать эти данные для перерисовки или обновления виджета.
-                                    salary.sum = result.sum;
-                                    salary.numbOfOrder = result.numbOfOrder;
-                                    salary.dateOfSalary = result.dateOfSalary;
-                                    salary.dateOfOrder = result.dateOfOrder;
+                            Text("номер приказа: " + salary.numbOfOrder.toString() ), // Отображаем название элемента
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.edit), // Кнопка редактирования
+                                  onPressed: () async {
+                                    final SalaryModel result = await showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return EditSalaryPopup(id: employee?.id);
+                                      },
+                                    );
+                                    if (result != null) {
+                                      // Вот ваш код после закрытия всплывающего окна с результатом.
+                                      // Например, можно обновить состояние родительского виджета с полученными данными.
+                                      setState(() {
+                                        // Обновите состояние с полученными данными из всплывающего окна.
+                                        // Например, вы можете использовать эти данные для перерисовки или обновления виджета.
+                                        salary.sum = result.sum;
+                                        salary.numbOfOrder = result.numbOfOrder;
+                                        salary.dateOfSalary = result.dateOfSalary;
+                                        salary.dateOfOrder = result.dateOfOrder;
 
-                                    // ... остальные данные ...
-                                  });
-                                }
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete), // Кнопка удаления
-                              onPressed: () {
-                                // Обработчик нажатия на кнопку удаления
-                              },
+                                        // ... остальные данные ...
+                                      });
+                                    }
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete), // Кнопка удаления
+                                  onPressed: () {
+                                    // Обработчик нажатия на кнопку удаления
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  );
-                }).toList();
-              },
-              child: Text("Посмотреть историю"), // Текст кнопки
-            ),
-
-            //premium
-            SizedBox(height: 16),
-            const Text(
-              "Премия",
-              // Указываем стиль текста с увеличенным размером шрифта
-              style: TextStyle(
-                fontSize: 15, // Устанавливаем размер шрифта в пунктах
-                fontWeight: FontWeight.bold, // Жирный стиль текста (по желанию)
-                // Другие настройки стиля текста, если необходимо
-              ),
-            ),
-            Row(
-              children: [
-                Container(
-                  width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
-                  child: TextFormField(
-                    controller: premiumSumController,
-                    onChanged: (value) {
-                      setState(() {
-                        premiumSum = value;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Сумма премии',
-                    ),
-
-                  ),
-                ),
-                SizedBox(width: 16.0),// Добавьте отступ между элементами
-                Container(
-                  width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
-                  child: GestureDetector(
-
-                    onTap: () async {
-                      final DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2101),
                       );
-                      if ( pickedDate != dateOfPremium)
-                        setState(() {
-                          dateOfPremium = pickedDate!;
-                          premiumDateController = pickedDate!;
-                        });
-                    },
-                    child: ListTile(
-                      title: Text('Дата премии'),
-                      subtitle: Text('${premiumDateController.toLocal()}'.split(' ')[0]),
-                      trailing: Icon(Icons.calendar_today),
-                    ),
-                  ),
+                    }).toList();
+                  },
+                  child: Text("Посмотреть историю"), // Текст кнопки
                 ),
 
-              ],
-            ),
-            Row(
-              children: [
-                Container(
-                  width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
-                  child: TextFormField(
-                    controller: premiumNumbController,
-                    onChanged: (value) {
-                      setState(() {
-                        premiumNumb = value;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Введите текст',
-                    ),
-
+                //premium
+                SizedBox(height: 30),
+                const Text(
+                  "Премия",
+                  // Указываем стиль текста с увеличенным размером шрифта
+                  style: TextStyle(
+                    fontSize: 15, // Устанавливаем размер шрифта в пунктах
+                    fontWeight: FontWeight.bold, // Жирный стиль текста (по желанию)
+                    // Другие настройки стиля текста, если необходимо
                   ),
                 ),
-                SizedBox(width: 16.0),// Добавьте отступ между элементами
-                Container(
-                  width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
-                  child: GestureDetector(
+                Row(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                      child: TextFormField(
+                        controller: premiumSumController,
+                        onChanged: (value) {
+                          setState(() {
+                            premiumSum = value;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Сумма премии',
+                        ),
 
-                    onTap: () async {
-                      final DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2101),
-                      );
-                      if ( pickedDate != dateOfPremOrder)
-                        setState(() {
-                          dateOfPremOrder = pickedDate!;
-                          premiumDateOrderController = pickedDate;
-                        });
-                    },
-                    child: ListTile(
-                      title: Text('Дата принятия'),
-                      subtitle: Text('${premiumDateOrderController.toLocal()}'.split(' ')[0]),
-                      trailing: Icon(Icons.calendar_today),
+                      ),
                     ),
-                  ),
+                    SizedBox(width: 16.0),// Добавьте отступ между элементами
+                    Container(
+                      width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                      child: GestureDetector(
+
+                        onTap: () async {
+                          final DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2101),
+                          );
+                          if ( pickedDate != dateOfPremium) {
+                            setState(() {
+                              dateOfPremium = pickedDate!;
+                              premiumDateController = pickedDate!;
+                            });
+                          }
+                        },
+                        child: ListTile(
+                          title: Text('Дата премии'),
+                          subtitle: Text('${premiumDateController.toLocal()}'.split(' ')[0]),
+                          trailing: Icon(Icons.calendar_today),
+                        ),
+                      ),
+                    ),
+
+                  ],
                 ),
+                Row(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                      child: TextFormField(
+                        controller: premiumNumbController,
+                        onChanged: (value) {
+                          setState(() {
+                            premiumNumb = value;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Введите текст',
+                        ),
 
-              ],
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Здесь можно отправить данные на сервер или выполнить другие действия
-                // Используйте значения text1, text2, и так далее
-                print('Имя: $premiumSum');
-                print('Фамилия: $premiumNumb');
-                print('Отчество: $dateOfPremium');
-                print('Телефон: $dateOfPremOrder');
+                      ),
+                    ),
+                    SizedBox(width: 16.0),// Добавьте отступ между элементами
+                    Container(
+                      width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                      child: GestureDetector(
 
-                salaryService.add("token", SalaryModel(id: null, sum: int.tryParse(premiumSum), dateOfSalary: dateOfPremium, numbOfOrder: int.tryParse(premiumNumb), dateOfOrder: dateOfPremOrder, employeeId: employee?.id));
+                        onTap: () async {
+                          final DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2101),
+                          );
+                          if ( pickedDate != dateOfPremOrder)
+                            setState(() {
+                              dateOfPremOrder = pickedDate!;
+                              premiumDateOrderController = pickedDate;
+                            });
+                        },
+                        child: ListTile(
+                          title: Text('Дата принятия'),
+                          subtitle: Text('${premiumDateOrderController.toLocal()}'.split(' ')[0]),
+                          trailing: Icon(Icons.calendar_today),
+                        ),
+                      ),
+                    ),
 
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
-                );
-                // Navigator.pushNamed(context, '/employee',);
-                // Future.delayed(Duration.zero, () {});
+                  ],
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // Здесь можно отправить данные на сервер или выполнить другие действия
+                    // Используйте значения text1, text2, и так далее
+                    print('Имя: $premiumSum');
+                    print('Фамилия: $premiumNumb');
+                    print('Отчество: $dateOfPremium');
+                    print('Телефон: $dateOfPremOrder');
 
-              },
-              child: Text('Отправить данные'),
-            ),
-            PopupMenuButton<String>(
-              onSelected: (String value) {
-                // setState(() {
-                //   selectedValue = value; // Обновляем выбранное значение
-                // });
-              },
-              itemBuilder: (BuildContext context) {
-                return premiumList.map((PremiumModel premium) {
-                  return PopupMenuItem<String>(
-                    value: premium.numbOfOrder.toString(), // Предположим, что у SalaryModel есть поле someValue
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("номер приказа: " + premium.numbOfOrder.toString() ), // Отображаем название элемента
-                        Row(
+                    salaryService.add("token", SalaryModel(id: null, sum: int.tryParse(premiumSum), dateOfSalary: dateOfPremium, numbOfOrder: int.tryParse(premiumNumb), dateOfOrder: dateOfPremOrder, employeeId: employee?.id));
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
+                    );
+                    // Navigator.pushNamed(context, '/employee',);
+                    // Future.delayed(Duration.zero, () {});
+
+                  },
+                  child: Text('Отправить данные'),
+                ),
+                PopupMenuButton<String>(
+                  onSelected: (String value) {
+                    // setState(() {
+                    //   selectedValue = value; // Обновляем выбранное значение
+                    // });
+                  },
+                  itemBuilder: (BuildContext context) {
+                    return premiumList.map((PremiumModel premium) {
+                      return PopupMenuItem<String>(
+                        value: premium.numbOfOrder.toString(), // Предположим, что у SalaryModel есть поле someValue
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            IconButton(
-                              icon: Icon(Icons.edit), // Кнопка редактирования
-                              onPressed: () async {
-                                final PremiumModel result = await showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return EditPremiumPopup(id: employee?.id);
-                                  },
-                                );
-                                if (result != null) {
-                                  // Вот ваш код после закрытия всплывающего окна с результатом.
-                                  // Например, можно обновить состояние родительского виджета с полученными данными.
-                                  setState(() {
-                                    // Обновите состояние с полученными данными из всплывающего окна.
-                                    // Например, вы можете использовать эти данные для перерисовки или обновления виджета.
-                                    premium.sum = result.sum;
-                                    premium.numbOfOrder = result.numbOfOrder;
-                                    premium.dateOfSalary = result.dateOfSalary;
-                                    premium.dateOfOrder = result.dateOfOrder;
+                            Text("номер приказа: " + premium.numbOfOrder.toString() ), // Отображаем название элемента
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.edit), // Кнопка редактирования
+                                  onPressed: () async {
+                                    final PremiumModel result = await showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return EditPremiumPopup(id: employee?.id);
+                                      },
+                                    );
+                                    if (result != null) {
+                                      // Вот ваш код после закрытия всплывающего окна с результатом.
+                                      // Например, можно обновить состояние родительского виджета с полученными данными.
+                                      setState(() {
+                                        // Обновите состояние с полученными данными из всплывающего окна.
+                                        // Например, вы можете использовать эти данные для перерисовки или обновления виджета.
+                                        premium.sum = result.sum;
+                                        premium.numbOfOrder = result.numbOfOrder;
+                                        premium.dateOfSalary = result.dateOfSalary;
+                                        premium.dateOfOrder = result.dateOfOrder;
 
-                                    // ... остальные данные ...
-                                  });
-                                }
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete), // Кнопка удаления
-                              onPressed: () {
-                                // Обработчик нажатия на кнопку удаления
-                              },
+                                        // ... остальные данные ...
+                                      });
+                                    }
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete), // Кнопка удаления
+                                  onPressed: () {
+                                    // Обработчик нажатия на кнопку удаления
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      );
+                    }).toList();
+                  },
+                  child: Text("Посмотреть историю"), // Текст кнопки
+                ),
+
+                //allowance
+                SizedBox(height: 30),
+                const Text(
+                  "Надбавка",
+                  // Указываем стиль текста с увеличенным размером шрифта
+                  style: TextStyle(
+                    fontSize: 15, // Устанавливаем размер шрифта в пунктах
+                    fontWeight: FontWeight.bold, // Жирный стиль текста (по желанию)
+                    // Другие настройки стиля текста, если необходимо
+                  ),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                      child: TextFormField(
+                        controller: allowanceSumController,
+                        onChanged: (value) {
+                          setState(() {
+                            allowanceSum = value;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Сумма премии',
+                        ),
+
+                      ),
                     ),
-                  );
-                }).toList();
-              },
-              child: Text("Посмотреть историю"), // Текст кнопки
-            )
-          ],
+                    SizedBox(width: 16.0),// Добавьте отступ между элементами
+                    Container(
+                      width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                      child: GestureDetector(
+
+                        onTap: () async {
+                          final DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2101),
+                          );
+                          if ( pickedDate != dateOfAllowance) {
+                            setState(() {
+                              dateOfAllowance = pickedDate!;
+                              allowanceDateController = pickedDate!;
+                            });
+                          }
+                        },
+                        child: ListTile(
+                          title: Text('Дата премии'),
+                          subtitle: Text('${allowanceDateController.toLocal()}'.split(' ')[0]),
+                          trailing: Icon(Icons.calendar_today),
+                        ),
+                      ),
+                    ),
+
+                  ],
+                ),
+                Row(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                      child: TextFormField(
+                        controller: allowanceNumbController,
+                        onChanged: (value) {
+                          setState(() {
+                            allowanceNumb = value;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Введите текст',
+                        ),
+
+                      ),
+                    ),
+                    SizedBox(width: 16.0),// Добавьте отступ между элементами
+                    Container(
+                      width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                      child: GestureDetector(
+
+                        onTap: () async {
+                          final DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2101),
+                          );
+                          if ( pickedDate != dateOfAllowOrder) {
+                            setState(() {
+                              dateOfAllowOrder = pickedDate!;
+                              allowanceDateOrderController = pickedDate;
+                            });
+                          }
+                        },
+                        child: ListTile(
+                          title: Text('Дата принятия'),
+                          subtitle: Text('${allowanceDateOrderController.toLocal()}'.split(' ')[0]),
+                          trailing: Icon(Icons.calendar_today),
+                        ),
+                      ),
+                    ),
+
+                  ],
+                ),
+                ElevatedButton(
+                  onPressed: () {
+
+
+
+                    salaryService.add("token", SalaryModel(id: null, sum: int.tryParse(allowanceSum), dateOfSalary: dateOfAllowance, numbOfOrder: int.tryParse(allowanceNumb), dateOfOrder: dateOfAllowOrder, employeeId: employee?.id));
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
+                    );
+                    // Navigator.pushNamed(context, '/employee',);
+                    // Future.delayed(Duration.zero, () {});
+
+                  },
+                  child: Text('Отправить данные'),
+                ),
+                PopupMenuButton<String>(
+                  onSelected: (String value) {
+                    // setState(() {
+                    //   selectedValue = value; // Обновляем выбранное значение
+                    // });
+                  },
+                  itemBuilder: (BuildContext context) {
+                    return allowanceList.map((AllowanceModel allowance) {
+                      return PopupMenuItem<String>(
+                        value: allowance.numbOfOrder.toString(), // Предположим, что у SalaryModel есть поле someValue
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("номер приказа: " + allowance.numbOfOrder.toString() ), // Отображаем название элемента
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.edit), // Кнопка редактирования
+                                  onPressed: () async {
+                                    final PremiumModel result = await showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return EditAllowancePopup(id: employee?.id);
+                                      },
+                                    );
+                                    if (result != null) {
+                                      // Вот ваш код после закрытия всплывающего окна с результатом.
+                                      // Например, можно обновить состояние родительского виджета с полученными данными.
+                                      setState(() {
+                                        // Обновите состояние с полученными данными из всплывающего окна.
+                                        // Например, вы можете использовать эти данные для перерисовки или обновления виджета.
+                                        allowance.sum = result.sum;
+                                        allowance.numbOfOrder = result.numbOfOrder;
+                                        allowance.dateOfSalary = result.dateOfSalary;
+                                        allowance.dateOfOrder = result.dateOfOrder;
+
+                                        // ... остальные данные ...
+                                      });
+                                    }
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete), // Кнопка удаления
+                                  onPressed: () {
+                                    // Обработчик нажатия на кнопку удаления
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList();
+                  },
+                  child: Text("Посмотреть историю"), // Текст кнопки
+                )
+              ],
+            ),
+          ),
         ),
-      ),
     );
   }
 }
