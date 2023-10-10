@@ -2,14 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/Model/PositionModel.dart';
 import 'package:flutter_project/Model/EmployeeModel.dart';
-import 'package:flutter_project/Model/EmployeeSearchModel.dart';
 import 'package:flutter_project/Service/employeeService.dart';
 import 'package:flutter_project/Service/positionService.dart';
 import 'package:flutter_project/pages/employeeScreen.dart';
 
-
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 
 class addEmployee extends StatefulWidget{

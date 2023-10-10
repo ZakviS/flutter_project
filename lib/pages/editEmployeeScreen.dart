@@ -2,17 +2,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/Model/PositionModel.dart';
 import 'package:flutter_project/Model/EmployeeModel.dart';
-import 'package:flutter_project/Model/EmployeeSearchModel.dart';
 import 'package:flutter_project/Model/SalaryModel.dart';
+import 'package:flutter_project/Service/PremiumService.dart';
 import 'package:flutter_project/Service/employeeService.dart';
 import 'package:flutter_project/Service/positionService.dart';
 import 'package:flutter_project/Service/salaryService.dart';
 import 'package:flutter_project/pages/employeeScreen.dart';
+import 'package:flutter_project/pages/premiumEditScreen.dart';
 import 'package:flutter_project/pages/salaryEditScreen.dart';
 
 
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+
+import '../Model/PremiumModel.dart';
 
 
 class editEmployeeScreen extends StatefulWidget {
@@ -32,9 +33,11 @@ class editEmployeeState extends State<editEmployeeScreen> {
   final employeeService = EmployeeService();
   final positionService = PositionService();
   final salaryService = SalaryService();
+  final premiumService = PremiumService();
 
   List<PositionModel> positionList = [];
   List<SalaryModel> salaryList = [];
+  List<PremiumModel> premiumList = [];
   PositionModel? selectedPosition;
   EmployeeModel? employee;
 
@@ -65,11 +68,20 @@ class editEmployeeState extends State<editEmployeeScreen> {
   DateTime dateOfSalary = DateTime.now();
   DateTime? dateOfSalOrder = DateTime.now() ;
 
+  String premiumSum = '';
+  String premiumNumb = '';
+  DateTime dateOfPremium = DateTime.now();
+  DateTime? dateOfPremOrder = DateTime.now() ;
+
   TextEditingController salarySumController = TextEditingController();
   DateTime salaryDateController = DateTime.now();
   TextEditingController salaryNumbController = TextEditingController();
   DateTime salaryDateOrderController = DateTime.now();
 
+  TextEditingController premiumSumController = TextEditingController();
+  DateTime premiumDateController = DateTime.now();
+  TextEditingController premiumNumbController = TextEditingController();
+  DateTime premiumDateOrderController = DateTime.now();
 
 
   @override
@@ -108,8 +120,10 @@ class editEmployeeState extends State<editEmployeeScreen> {
 
     final employee = this.employee;
     await salaryService.loadSalary(employee?.id);
+    await premiumService.loadPremium(employee?.id);
 
 
+    premiumList.addAll(premiumService.getPremiumList());
     salaryList.addAll(salaryService.getSalaryList());
     if (employee != null) {
        text1 = employee.name;
@@ -337,7 +351,7 @@ class editEmployeeState extends State<editEmployeeScreen> {
                   });
                 },
                 decoration: InputDecoration(
-                  hintText: 'Введите текст',
+                  hintText: 'Сумма зарплаты',
                 ),
 
               ),
@@ -361,7 +375,7 @@ class editEmployeeState extends State<editEmployeeScreen> {
                     });
                 },
                 child: ListTile(
-                  title: Text('Дата принятия'),
+                  title: Text('Дата зарплаты'),
                   subtitle: Text('${salaryDateController.toLocal()}'.split(' ')[0]),
                   trailing: Icon(Icons.calendar_today),
                 ),
@@ -424,8 +438,8 @@ class editEmployeeState extends State<editEmployeeScreen> {
                 print('Отчество: $dateOfSalary');
                 print('Телефон: $dateOfSalOrder');
 
-                // EmployeeModel employee = EmployeeModel(id: 1,name: text1, surname: text2, secondSurname: text3, beginning: date1, dismissal: date2, phoneNumber: text4, email: text5, positionId: selectedPosition!.id);
-                // employeeService.add("token", employee);
+                salaryService.add("token", SalaryModel(id: null, sum: int.tryParse(salarySum), dateOfSalary: dateOfSalary, numbOfOrder: int.tryParse(salaryNumb), dateOfOrder: dateOfSalOrder, employeeId: employee?.id));
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
@@ -458,7 +472,7 @@ class editEmployeeState extends State<editEmployeeScreen> {
                                 final SalaryModel result = await showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
-                                    return EditPopup(id: employee?.id);
+                                    return EditSalaryPopup(id: employee?.id);
                                   },
                                 );
                                 if (result != null) {
@@ -491,8 +505,186 @@ class editEmployeeState extends State<editEmployeeScreen> {
                 }).toList();
               },
               child: Text("Посмотреть историю"), // Текст кнопки
-            )
+            ),
 
+            //premium
+            SizedBox(height: 16),
+            const Text(
+              "Премия",
+              // Указываем стиль текста с увеличенным размером шрифта
+              style: TextStyle(
+                fontSize: 15, // Устанавливаем размер шрифта в пунктах
+                fontWeight: FontWeight.bold, // Жирный стиль текста (по желанию)
+                // Другие настройки стиля текста, если необходимо
+              ),
+            ),
+            Row(
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                  child: TextFormField(
+                    controller: premiumSumController,
+                    onChanged: (value) {
+                      setState(() {
+                        premiumSum = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Сумма премии',
+                    ),
+
+                  ),
+                ),
+                SizedBox(width: 16.0),// Добавьте отступ между элементами
+                Container(
+                  width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                  child: GestureDetector(
+
+                    onTap: () async {
+                      final DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2101),
+                      );
+                      if ( pickedDate != dateOfPremium)
+                        setState(() {
+                          dateOfPremium = pickedDate!;
+                          premiumDateController = pickedDate!;
+                        });
+                    },
+                    child: ListTile(
+                      title: Text('Дата премии'),
+                      subtitle: Text('${premiumDateController.toLocal()}'.split(' ')[0]),
+                      trailing: Icon(Icons.calendar_today),
+                    ),
+                  ),
+                ),
+
+              ],
+            ),
+            Row(
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                  child: TextFormField(
+                    controller: premiumNumbController,
+                    onChanged: (value) {
+                      setState(() {
+                        premiumNumb = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Введите текст',
+                    ),
+
+                  ),
+                ),
+                SizedBox(width: 16.0),// Добавьте отступ между элементами
+                Container(
+                  width: MediaQuery.of(context).size.width/2-24, // Установите желаемую фиксированную ширину
+                  child: GestureDetector(
+
+                    onTap: () async {
+                      final DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2101),
+                      );
+                      if ( pickedDate != dateOfPremOrder)
+                        setState(() {
+                          dateOfPremOrder = pickedDate!;
+                          premiumDateOrderController = pickedDate;
+                        });
+                    },
+                    child: ListTile(
+                      title: Text('Дата принятия'),
+                      subtitle: Text('${premiumDateOrderController.toLocal()}'.split(' ')[0]),
+                      trailing: Icon(Icons.calendar_today),
+                    ),
+                  ),
+                ),
+
+              ],
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Здесь можно отправить данные на сервер или выполнить другие действия
+                // Используйте значения text1, text2, и так далее
+                print('Имя: $premiumSum');
+                print('Фамилия: $premiumNumb');
+                print('Отчество: $dateOfPremium');
+                print('Телефон: $dateOfPremOrder');
+
+                salaryService.add("token", SalaryModel(id: null, sum: int.tryParse(premiumSum), dateOfSalary: dateOfPremium, numbOfOrder: int.tryParse(premiumNumb), dateOfOrder: dateOfPremOrder, employeeId: employee?.id));
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
+                );
+                // Navigator.pushNamed(context, '/employee',);
+                // Future.delayed(Duration.zero, () {});
+
+              },
+              child: Text('Отправить данные'),
+            ),
+            PopupMenuButton<String>(
+              onSelected: (String value) {
+                // setState(() {
+                //   selectedValue = value; // Обновляем выбранное значение
+                // });
+              },
+              itemBuilder: (BuildContext context) {
+                return premiumList.map((PremiumModel premium) {
+                  return PopupMenuItem<String>(
+                    value: premium.numbOfOrder.toString(), // Предположим, что у SalaryModel есть поле someValue
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("номер приказа: " + premium.numbOfOrder.toString() ), // Отображаем название элемента
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit), // Кнопка редактирования
+                              onPressed: () async {
+                                final PremiumModel result = await showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return EditPremiumPopup(id: employee?.id);
+                                  },
+                                );
+                                if (result != null) {
+                                  // Вот ваш код после закрытия всплывающего окна с результатом.
+                                  // Например, можно обновить состояние родительского виджета с полученными данными.
+                                  setState(() {
+                                    // Обновите состояние с полученными данными из всплывающего окна.
+                                    // Например, вы можете использовать эти данные для перерисовки или обновления виджета.
+                                    premium.sum = result.sum;
+                                    premium.numbOfOrder = result.numbOfOrder;
+                                    premium.dateOfSalary = result.dateOfSalary;
+                                    premium.dateOfOrder = result.dateOfOrder;
+
+                                    // ... остальные данные ...
+                                  });
+                                }
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete), // Кнопка удаления
+                              onPressed: () {
+                                // Обработчик нажатия на кнопку удаления
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList();
+              },
+              child: Text("Посмотреть историю"), // Текст кнопки
+            )
           ],
         ),
       ),

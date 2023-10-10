@@ -1,7 +1,7 @@
 
-class SalaryModel{
+class PremiumModel{
 
-  final int? id;
+  final int id;
   int? sum;
   DateTime? dateOfSalary;
   int? numbOfOrder;
@@ -9,7 +9,7 @@ class SalaryModel{
   int? employeeId;
 
 
-  SalaryModel({
+  PremiumModel({
     required this.id,
     required this.sum,
     required this.dateOfSalary,
@@ -21,8 +21,8 @@ class SalaryModel{
 
 
 
-  factory SalaryModel.fromJson(Map<String, dynamic> json) {
-    return SalaryModel(
+  factory PremiumModel.fromJson(Map<String, dynamic> json) {
+    return PremiumModel(
       id: json['id'],
       sum: json['sum'],
       dateOfSalary: json['month'] != null ? DateTime.parse(json['month']) : null,
@@ -32,8 +32,8 @@ class SalaryModel{
     );
   }
 
-  static List<SalaryModel> fromJsonList(List<Map<String, dynamic>> jsonList) {
-    return jsonList.map((json) => SalaryModel.fromJson(json)).toList();
+  static List<PremiumModel> fromJsonList(List<Map<String, dynamic>> jsonList) {
+    return jsonList.map((json) => PremiumModel.fromJson(json)).toList();
   }
 
   Map<String, dynamic> toJson() {
