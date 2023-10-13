@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_project/Model/EmployeeSearchModel.dart';
 import 'package:http/http.dart' as http;
 
 import '../Model/EmployeeModel.dart';
+import '../Model/EmployeeResponse.dart';
 import '../api/apiService.dart';
 
 class EmployeeService{
@@ -46,7 +48,11 @@ class EmployeeService{
 
   }
 
+  Future<EmployeeResponse> searchEmployee(EmployeeSearchModel employeeSearchModel) async {
 
+    return await api.searchEmployee(employeeSearchModel);
+
+  }
 
 
 }

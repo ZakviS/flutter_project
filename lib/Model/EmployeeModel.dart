@@ -35,7 +35,7 @@ class EmployeeModel{
        // dismissal: DateTime.parse(json['dismissal']),
        dismissal: json['dismissal'] != null ? DateTime.parse(json['dismissal']) : null,
 
-     phoneNumber: json['phoneNumber'],
+       phoneNumber: json['phoneNumber'],
        email: json['email'],
        positionId: json['positionId'],
      );

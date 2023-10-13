@@ -6,6 +6,8 @@ import 'package:flutter_project/Model/SalaryModel.dart';
 import 'package:http/http.dart' as http;
 
 import '../Model/EmployeeModel.dart';
+import '../Model/EmployeeResponse.dart';
+import '../Model/EmployeeSearchModel.dart';
 
 class ApiService{
   final String baseUrl = "http://localhost:8080";
@@ -338,6 +340,25 @@ class ApiService{
     } else {
       print('Request failed with status: ${response.statusCode}');
       throw Exception('Request failed with status: ${response.statusCode}');
+    }
+  }
+
+  Future<EmployeeResponse> searchEmployee(EmployeeSearchModel employeeSearchModel) async {
+    final url = Uri.parse('$baseUrl/employee/search');
+
+    final response = await http.post(
+      url,
+      headers: <String, String>{
+        'Authorization': '$token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(employeeSearchModel),
+    );
+
+    if (response.statusCode == 200) {
+      return EmployeeResponse.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load employee response');
     }
   }
 }
