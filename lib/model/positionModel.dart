@@ -1,10 +1,7 @@
-
-class PositionModel{
-
+class PositionModel {
   final int id;
   String name;
   DateTime? beginning;
-
 
   PositionModel({
     required this.id,
@@ -12,14 +9,13 @@ class PositionModel{
     required this.beginning,
   });
 
-
-
   factory PositionModel.fromJson(Map<String, dynamic> json) {
     return PositionModel(
       id: json['id'],
       name: json['name'],
       // beginning: DateTime.parse(json['beginning']),
-      beginning: json['beginning'] != null ? DateTime.parse(json['beginning']) : null,
+      beginning:
+          json['beginning'] != null ? DateTime.parse(json['beginning']) : null,
     );
   }
 

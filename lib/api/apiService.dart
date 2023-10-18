@@ -1,15 +1,15 @@
 import 'dart:convert';
 
-import 'package:flutter_project/Model/AllowanceModel.dart';
-import 'package:flutter_project/Model/PremiumModel.dart';
-import 'package:flutter_project/Model/SalaryModel.dart';
+import 'package:flutter_project/model/allowanceModel.dart';
+import 'package:flutter_project/model/premiumModel.dart';
+import 'package:flutter_project/model/salaryModel.dart';
 import 'package:http/http.dart' as http;
 
-import '../Model/EmployeeModel.dart';
-import '../Model/EmployeeResponse.dart';
-import '../Model/EmployeeSearchModel.dart';
+import '../model/employeeModel.dart';
+import '../model/employeeResponse.dart';
+import '../model/employeeSearchModel.dart';
 
-class ApiService{
+class ApiService {
   final String baseUrl = "http://localhost:8080";
   final String token = "asd";
 
@@ -55,10 +55,8 @@ class ApiService{
       headers: {
         'Authorization': '$token',
         'Content-Type': 'application/json',
-
       },
       body: jsonEncode(employeeModel.toJson()),
-
     );
 
     if (response.statusCode == 201) {
@@ -69,7 +67,7 @@ class ApiService{
     }
   }
 
-  Future<String> editEmployee(EmployeeModel employeeModel,int id) async {
+  Future<String> editEmployee(EmployeeModel employeeModel, int id) async {
     final url = Uri.parse('$baseUrl/employee/edit/$id');
 
     final response = await http.put(
@@ -77,10 +75,8 @@ class ApiService{
       headers: {
         'Authorization': '$token',
         'Content-Type': 'application/json',
-
       },
       body: jsonEncode(employeeModel.toJson()),
-
     );
 
     if (response.statusCode == 200) {
@@ -106,10 +102,9 @@ class ApiService{
     } else {
       throw Exception('Request failed with status: ${response.statusCode}');
     }
-
   }
 
-  Future<String> getSalary(int ?id) async {
+  Future<String> getSalary(int? id) async {
     final url = Uri.parse('$baseUrl/salary/get/$id');
 
     final response = await http.get(
@@ -150,10 +145,8 @@ class ApiService{
       headers: {
         'Authorization': '$token',
         'Content-Type': 'application/json',
-
       },
       body: jsonEncode(salaryModel.toJson()),
-
     );
 
     if (response.statusCode == 201) {
@@ -164,7 +157,7 @@ class ApiService{
     }
   }
 
-  Future<String> editSalary(SalaryModel salaryModel,int id) async {
+  Future<String> editSalary(SalaryModel salaryModel, int id) async {
     final url = Uri.parse('$baseUrl/salary/edit/$id');
 
     final response = await http.put(
@@ -172,10 +165,8 @@ class ApiService{
       headers: {
         'Authorization': '$token',
         'Content-Type': 'application/json',
-
       },
       body: jsonEncode(salaryModel.toJson()),
-
     );
 
     if (response.statusCode == 200) {
@@ -186,8 +177,7 @@ class ApiService{
     }
   }
 
-
-  Future<String> getPremium(int ?id) async {
+  Future<String> getPremium(int? id) async {
     final url = Uri.parse('$baseUrl/premium/get/$id');
 
     final response = await http.get(
@@ -229,10 +219,8 @@ class ApiService{
       headers: {
         'Authorization': '$token',
         'Content-Type': 'application/json',
-
       },
       body: jsonEncode(premiumModel.toJson()),
-
     );
 
     if (response.statusCode == 201) {
@@ -243,7 +231,7 @@ class ApiService{
     }
   }
 
-  Future<String> editPremium(PremiumModel premiumModel,int id) async {
+  Future<String> editPremium(PremiumModel premiumModel, int id) async {
     final url = Uri.parse('$baseUrl/premium/edit/$id');
 
     final response = await http.put(
@@ -251,10 +239,8 @@ class ApiService{
       headers: {
         'Authorization': '$token',
         'Content-Type': 'application/json',
-
       },
       body: jsonEncode(premiumModel.toJson()),
-
     );
 
     if (response.statusCode == 200) {
@@ -265,7 +251,7 @@ class ApiService{
     }
   }
 
-  Future<String> getAllowance(int ?id) async {
+  Future<String> getAllowance(int? id) async {
     final url = Uri.parse('$baseUrl/premium/get/$id');
 
     final response = await http.get(
@@ -307,10 +293,8 @@ class ApiService{
       headers: {
         'Authorization': '$token',
         'Content-Type': 'application/json',
-
       },
       body: jsonEncode(allowanceModel.toJson()),
-
     );
 
     if (response.statusCode == 201) {
@@ -321,7 +305,7 @@ class ApiService{
     }
   }
 
-  Future<String> editAllowance(AllowanceModel allowanceModel,int id) async {
+  Future<String> editAllowance(AllowanceModel allowanceModel, int id) async {
     final url = Uri.parse('$baseUrl/premium/edit/$id');
 
     final response = await http.put(
@@ -329,10 +313,8 @@ class ApiService{
       headers: {
         'Authorization': '$token',
         'Content-Type': 'application/json',
-
       },
       body: jsonEncode(allowanceModel.toJson()),
-
     );
 
     if (response.statusCode == 200) {
@@ -343,7 +325,8 @@ class ApiService{
     }
   }
 
-  Future<EmployeeResponse> searchEmployee(EmployeeSearchModel employeeSearchModel) async {
+  Future<EmployeeResponse> searchEmployee(
+      EmployeeSearchModel employeeSearchModel) async {
     final url = Uri.parse('$baseUrl/employee/search');
 
     final response = await http.post(

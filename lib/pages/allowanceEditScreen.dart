@@ -1,15 +1,12 @@
-
 import 'package:flutter/material.dart';
-import 'package:flutter_project/Model/AllowanceModel.dart';
-import 'package:flutter_project/Model/SalaryModel.dart';
-import 'package:flutter_project/Service/allowanceService.dart';
-import 'package:flutter_project/Service/salaryService.dart';
+import 'package:flutter_project/model/allowanceModel.dart';
+import 'package:flutter_project/model/salaryModel.dart';
+import 'package:flutter_project/service/allowanceService.dart';
 
 class EditAllowancePopup extends StatefulWidget {
-
   final int? id;
-  const EditAllowancePopup({Key? key, required this.id}) : super(key: key);
 
+  const EditAllowancePopup({Key? key, required this.id}) : super(key: key);
 
   @override
   _EditPopupState createState() => _EditPopupState();
@@ -20,8 +17,9 @@ class _EditPopupState extends State<EditAllowancePopup> {
   int? id;
   AllowanceModel? allowance;
 
-  int? text1 ;
-  int? text2 ;
+  int? text1;
+
+  int? text2;
 
   TextEditingController textController1 = TextEditingController();
   TextEditingController textController2 = TextEditingController();
@@ -31,15 +29,12 @@ class _EditPopupState extends State<EditAllowancePopup> {
   DateTime? date1 = DateTime.now();
   DateTime? date2 = DateTime.now();
 
-
   @override
   void initState() {
     super.initState();
     id = widget.id;
     initFields();
     // fetchDataAndPrintName();
-
-
   }
 
   Future<void> initFields() async {
@@ -48,8 +43,10 @@ class _EditPopupState extends State<EditAllowancePopup> {
       textController1.text = allowance!.sum.toString();
       textController2.text = allowance!.numbOfOrder.toString();
 
-      date1Controller.text = '${allowance!.dateOfSalary?.toLocal()}'.split(' ')[0];
-      date2Controller.text = '${allowance!.dateOfOrder?.toLocal()}'.split(' ')[0];
+      date1Controller.text =
+          '${allowance!.dateOfSalary?.toLocal()}'.split(' ')[0];
+      date2Controller.text =
+          '${allowance!.dateOfOrder?.toLocal()}'.split(' ')[0];
     }
   }
 
@@ -63,13 +60,12 @@ class _EditPopupState extends State<EditAllowancePopup> {
       // print(salary?.sum);
     });
 
-
     final allowance = this.allowance;
     if (allowance != null) {
       text1 = allowance.sum;
       text2 = allowance.numbOfOrder;
       date1 = allowance.dateOfSalary;
-      date2 = allowance.dateOfOrder ;
+      date2 = allowance.dateOfOrder;
     }
   }
 
@@ -100,7 +96,9 @@ class _EditPopupState extends State<EditAllowancePopup> {
           ),
           ListTile(
             title: Text('Дата 2'),
-            subtitle: Text('${date2 != null ? date1?.toLocal() : DateTime.now().toLocal()}'.split(' ')[0]),
+            subtitle: Text(
+                '${date2 != null ? date1?.toLocal() : DateTime.now().toLocal()}'
+                    .split(' ')[0]),
             trailing: Icon(Icons.calendar_today),
             onTap: () async {
               final DateTime? pickedDate = await showDatePicker(
@@ -115,10 +113,11 @@ class _EditPopupState extends State<EditAllowancePopup> {
                 });
             },
           ),
-
           ListTile(
             title: Text('Дата 2'),
-            subtitle: Text('${date2 != null ? date2?.toLocal() : DateTime.now().toLocal()}'.split(' ')[0]),
+            subtitle: Text(
+                '${date2 != null ? date2?.toLocal() : DateTime.now().toLocal()}'
+                    .split(' ')[0]),
             trailing: Icon(Icons.calendar_today),
             onTap: () async {
               final DateTime? pickedDate = await showDatePicker(
@@ -133,7 +132,6 @@ class _EditPopupState extends State<EditAllowancePopup> {
                 });
             },
           ),
-
         ],
       ),
       actions: [
@@ -147,10 +145,24 @@ class _EditPopupState extends State<EditAllowancePopup> {
         ElevatedButton(
           onPressed: () {
             // Обработчик нажатия на кнопку сохранения
-            allowanceService.edit("token", AllowanceModel(id: allowance!.id, sum: text1, dateOfSalary: date1, numbOfOrder: text2, dateOfOrder: date2, employeeId: allowance?.employeeId), 5);
-            final result = SalaryModel(id: allowance!.id, sum: text1, dateOfSalary: date1, numbOfOrder: text2, dateOfOrder: date2, employeeId: allowance?.employeeId);
+            allowanceService.edit(
+                "token",
+                AllowanceModel(
+                    id: allowance!.id,
+                    sum: text1,
+                    dateOfSalary: date1,
+                    numbOfOrder: text2,
+                    dateOfOrder: date2,
+                    employeeId: allowance?.employeeId),
+                5);
+            final result = SalaryModel(
+                id: allowance!.id,
+                sum: text1,
+                dateOfSalary: date1,
+                numbOfOrder: text2,
+                dateOfOrder: date2,
+                employeeId: allowance?.employeeId);
             Navigator.of(context).pop(result);
-
           },
           child: Text("Сохранить"),
         ),

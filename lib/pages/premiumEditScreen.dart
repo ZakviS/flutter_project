@@ -1,13 +1,11 @@
-
 import 'package:flutter/material.dart';
-import 'package:flutter_project/Model/PremiumModel.dart';
-import 'package:flutter_project/Service/premiumService.dart';
+import 'package:flutter_project/model/premiumModel.dart';
+import 'package:flutter_project/service/premiumService.dart';
 
 class EditPremiumPopup extends StatefulWidget {
-
   final int? id;
-  const EditPremiumPopup({Key? key, required this.id}) : super(key: key);
 
+  const EditPremiumPopup({Key? key, required this.id}) : super(key: key);
 
   @override
   _EditPopupState createState() => _EditPopupState();
@@ -18,8 +16,9 @@ class _EditPopupState extends State<EditPremiumPopup> {
   int? id;
   PremiumModel? premium;
 
-  int? text1 ;
-  int? text2 ;
+  int? text1;
+
+  int? text2;
 
   TextEditingController textController1 = TextEditingController();
   TextEditingController textController2 = TextEditingController();
@@ -29,15 +28,12 @@ class _EditPopupState extends State<EditPremiumPopup> {
   DateTime? date1 = DateTime.now();
   DateTime? date2 = DateTime.now();
 
-
   @override
   void initState() {
     super.initState();
     id = widget.id;
     initFields();
     // fetchDataAndPrintName();
-
-
   }
 
   Future<void> initFields() async {
@@ -46,7 +42,8 @@ class _EditPopupState extends State<EditPremiumPopup> {
       textController1.text = premium!.sum.toString();
       textController2.text = premium!.numbOfOrder.toString();
 
-      date1Controller.text = '${premium!.dateOfSalary?.toLocal()}'.split(' ')[0];
+      date1Controller.text =
+          '${premium!.dateOfSalary?.toLocal()}'.split(' ')[0];
       date2Controller.text = '${premium!.dateOfOrder?.toLocal()}'.split(' ')[0];
     }
   }
@@ -61,13 +58,12 @@ class _EditPopupState extends State<EditPremiumPopup> {
       // print(salary?.sum);
     });
 
-
     final salary = this.premium;
     if (salary != null) {
       text1 = salary.sum;
       text2 = salary.numbOfOrder;
       date1 = salary.dateOfSalary;
-      date2 = salary.dateOfOrder ;
+      date2 = salary.dateOfOrder;
     }
   }
 
@@ -98,7 +94,9 @@ class _EditPopupState extends State<EditPremiumPopup> {
           ),
           ListTile(
             title: Text('Дата 2'),
-            subtitle: Text('${date2 != null ? date1?.toLocal() : DateTime.now().toLocal()}'.split(' ')[0]),
+            subtitle: Text(
+                '${date2 != null ? date1?.toLocal() : DateTime.now().toLocal()}'
+                    .split(' ')[0]),
             trailing: Icon(Icons.calendar_today),
             onTap: () async {
               final DateTime? pickedDate = await showDatePicker(
@@ -113,10 +111,11 @@ class _EditPopupState extends State<EditPremiumPopup> {
                 });
             },
           ),
-
           ListTile(
             title: Text('Дата 2'),
-            subtitle: Text('${date2 != null ? date2?.toLocal() : DateTime.now().toLocal()}'.split(' ')[0]),
+            subtitle: Text(
+                '${date2 != null ? date2?.toLocal() : DateTime.now().toLocal()}'
+                    .split(' ')[0]),
             trailing: Icon(Icons.calendar_today),
             onTap: () async {
               final DateTime? pickedDate = await showDatePicker(
@@ -131,7 +130,6 @@ class _EditPopupState extends State<EditPremiumPopup> {
                 });
             },
           ),
-
         ],
       ),
       actions: [
@@ -145,10 +143,24 @@ class _EditPopupState extends State<EditPremiumPopup> {
         ElevatedButton(
           onPressed: () {
             // Обработчик нажатия на кнопку сохранения
-            premiumService.edit("token", PremiumModel(id: premium!.id, sum: text1, dateOfSalary: date1, numbOfOrder: text2, dateOfOrder: date2, employeeId: premium?.employeeId), 5);
-            final result = PremiumModel(id: premium!.id, sum: text1, dateOfSalary: date1, numbOfOrder: text2, dateOfOrder: date2, employeeId: premium?.employeeId);
+            premiumService.edit(
+                "token",
+                PremiumModel(
+                    id: premium!.id,
+                    sum: text1,
+                    dateOfSalary: date1,
+                    numbOfOrder: text2,
+                    dateOfOrder: date2,
+                    employeeId: premium?.employeeId),
+                5);
+            final result = PremiumModel(
+                id: premium!.id,
+                sum: text1,
+                dateOfSalary: date1,
+                numbOfOrder: text2,
+                dateOfOrder: date2,
+                employeeId: premium?.employeeId);
             Navigator.of(context).pop(result);
-
           },
           child: Text("Сохранить"),
         ),

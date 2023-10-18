@@ -1,13 +1,11 @@
-
 import 'package:flutter/material.dart';
-import 'package:flutter_project/Model/SalaryModel.dart';
-import 'package:flutter_project/Service/salaryService.dart';
+import 'package:flutter_project/model/salaryModel.dart';
+import 'package:flutter_project/service/salaryService.dart';
 
 class EditSalaryPopup extends StatefulWidget {
-
   final int? id;
-  const EditSalaryPopup({Key? key, required this.id}) : super(key: key);
 
+  const EditSalaryPopup({Key? key, required this.id}) : super(key: key);
 
   @override
   _EditPopupState createState() => _EditPopupState();
@@ -18,8 +16,9 @@ class _EditPopupState extends State<EditSalaryPopup> {
   int? id;
   SalaryModel? salary;
 
-  int? text1 ;
-  int? text2 ;
+  int? text1;
+
+  int? text2;
 
   TextEditingController textController1 = TextEditingController();
   TextEditingController textController2 = TextEditingController();
@@ -29,15 +28,12 @@ class _EditPopupState extends State<EditSalaryPopup> {
   DateTime? date1 = DateTime.now();
   DateTime? date2 = DateTime.now();
 
-
   @override
   void initState() {
     super.initState();
     id = widget.id;
     initFields();
     // fetchDataAndPrintName();
-
-
   }
 
   Future<void> initFields() async {
@@ -61,13 +57,12 @@ class _EditPopupState extends State<EditSalaryPopup> {
       // print(salary?.sum);
     });
 
-
     final salary = this.salary;
     if (salary != null) {
       text1 = salary.sum;
       text2 = salary.numbOfOrder;
       date1 = salary.dateOfSalary;
-      date2 = salary.dateOfOrder ;
+      date2 = salary.dateOfOrder;
     }
   }
 
@@ -98,7 +93,9 @@ class _EditPopupState extends State<EditSalaryPopup> {
           ),
           ListTile(
             title: Text('Дата 2'),
-            subtitle: Text('${date2 != null ? date1?.toLocal() : DateTime.now().toLocal()}'.split(' ')[0]),
+            subtitle: Text(
+                '${date2 != null ? date1?.toLocal() : DateTime.now().toLocal()}'
+                    .split(' ')[0]),
             trailing: Icon(Icons.calendar_today),
             onTap: () async {
               final DateTime? pickedDate = await showDatePicker(
@@ -113,10 +110,11 @@ class _EditPopupState extends State<EditSalaryPopup> {
                 });
             },
           ),
-
           ListTile(
             title: Text('Дата 2'),
-            subtitle: Text('${date2 != null ? date2?.toLocal() : DateTime.now().toLocal()}'.split(' ')[0]),
+            subtitle: Text(
+                '${date2 != null ? date2?.toLocal() : DateTime.now().toLocal()}'
+                    .split(' ')[0]),
             trailing: Icon(Icons.calendar_today),
             onTap: () async {
               final DateTime? pickedDate = await showDatePicker(
@@ -131,7 +129,6 @@ class _EditPopupState extends State<EditSalaryPopup> {
                 });
             },
           ),
-
         ],
       ),
       actions: [
@@ -145,10 +142,24 @@ class _EditPopupState extends State<EditSalaryPopup> {
         ElevatedButton(
           onPressed: () {
             // Обработчик нажатия на кнопку сохранения
-            salaryService.edit("token", SalaryModel(id: salary!.id, sum: text1, dateOfSalary: date1, numbOfOrder: text2, dateOfOrder: date2, employeeId: salary?.employeeId), 5);
-            final result = SalaryModel(id: salary!.id, sum: text1, dateOfSalary: date1, numbOfOrder: text2, dateOfOrder: date2, employeeId: salary?.employeeId);
+            salaryService.edit(
+                "token",
+                SalaryModel(
+                    id: salary!.id,
+                    sum: text1,
+                    dateOfSalary: date1,
+                    numbOfOrder: text2,
+                    dateOfOrder: date2,
+                    employeeId: salary?.employeeId),
+                5);
+            final result = SalaryModel(
+                id: salary!.id,
+                sum: text1,
+                dateOfSalary: date1,
+                numbOfOrder: text2,
+                dateOfOrder: date2,
+                employeeId: salary?.employeeId);
             Navigator.of(context).pop(result);
-
           },
           child: Text("Сохранить"),
         ),

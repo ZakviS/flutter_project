@@ -1,6 +1,4 @@
-import 'dart:convert';
-
-import 'EmployeeModel.dart';
+import 'employeeModel.dart';
 
 class EmployeeResponse {
   List<EmployeeModel> employee;
@@ -21,7 +19,8 @@ class EmployeeResponse {
 
   factory EmployeeResponse.fromJson(Map<String, dynamic> json) {
     return EmployeeResponse(
-      employee: List<EmployeeModel>.from(json['employee'].map((e) => EmployeeModel.fromJson(e))),
+      employee: List<EmployeeModel>.from(
+          json['employee'].map((e) => EmployeeModel.fromJson(e))),
       pageNo: json['pageNo'],
       pageSize: json['pageSize'],
       totalElements: json['totalElements'],

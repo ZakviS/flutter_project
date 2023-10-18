@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/Model/EmployeeModel.dart';
-import 'package:flutter_project/Model/EmployeeResponse.dart';
-import 'package:flutter_project/Model/EmployeeSearchModel.dart';
-import 'package:flutter_project/Model/PositionModel.dart';
-import 'package:flutter_project/Service/employeeService.dart';
-import 'package:flutter_project/Service/positionService.dart';
+import 'package:flutter_project/model/employeeModel.dart';
+import 'package:flutter_project/model/employeeResponse.dart';
+import 'package:flutter_project/model/employeeSearchModel.dart';
+import 'package:flutter_project/model/positionModel.dart';
+import 'package:flutter_project/service/employeeService.dart';
+import 'package:flutter_project/service/positionService.dart';
 import 'package:flutter_project/pages/addEmployeeScreen.dart';
-
 
 import '../main.dart';
 import 'editEmployeeScreen.dart';
 
-
-class Employee extends StatefulWidget{
+class Employee extends StatefulWidget {
   const Employee({super.key});
 
   @override
@@ -20,11 +18,9 @@ class Employee extends StatefulWidget{
     // TODO: implement createState
     return EmployeeState();
   }
-
 }
 
-
-class EmployeeState extends State<Employee>{
+class EmployeeState extends State<Employee> {
   final employeeService = EmployeeService();
   final positionService = PositionService();
   List<EmployeeModel> employeeList = [];
@@ -32,10 +28,10 @@ class EmployeeState extends State<Employee>{
 
   TextEditingController searchController = TextEditingController();
   String filter = '';
-  bool hideDismissed = false; // Изначально не скрываем уволенных
-
+  bool hideDismissed = false;
 
   final ScrollController _scrollController = ScrollController();
+
   // EmployeeSearchModel
   int page = 0;
   bool isLoading = false;
@@ -44,14 +40,13 @@ class EmployeeState extends State<Employee>{
   // int pageSize = 5;
   // EmployeeSearchModel(surname: '', working: false, page: 0,  elementPerPage: 5,  direction: "dsc",  key: "surname");
 
-
   @override
-  void initState(){
+  void initState() {
     super.initState();
     employeeList = <EmployeeModel>[];
     positionList = <PositionModel>[];
     fetchDataAndPrintName();
-    loadNextPage(page,"",hideDismissed);
+    loadNextPage(page, "", hideDismissed);
 
     _scrollController.addListener(() {
       if (_scrollController.position.atEdge) {
@@ -61,7 +56,8 @@ class EmployeeState extends State<Employee>{
         } else {
           // Нижний край списка
           print("object");
-          loadNextPage(page,"",hideDismissed); // Загрузка следующей страницы данных
+          loadNextPage(
+              page, "", hideDismissed); // Загрузка следующей страницы данных
         }
       }
     });
@@ -72,214 +68,212 @@ class EmployeeState extends State<Employee>{
       filter = text;
       employeeList.clear();
       page = 0;
-      loadNextPage(page,filter,hideDismissed);
+      loadNextPage(page, filter, hideDismissed);
     });
   }
 
-
-  Future<void> loadNextPage(int page,String surname,bool work) async {
+  Future<void> loadNextPage(int page, String surname, bool work) async {
     if (!isLoading) {
-      // Устанавливаем isLoading в true, чтобы предотвратить дополнительные запросы
       isLoading = true;
 
-      // Здесь вы можете выполнить запрос к серверу для загрузки следующей страницы данных
+
       try {
-        EmployeeResponse newData = await employeeService.searchEmployee(EmployeeSearchModel(
-            surname: surname,
-            working: work,
-            page: page,
-            elementPerPage: 12,
-            direction: "dsc",
-            key: "surname")); // Загружаем новые данные, замените на вашу логику
+        EmployeeResponse newData = (await employeeService.searchEmployee(
+            EmployeeSearchModel(
+                surname: surname,
+                working: work,
+                page: page,
+                elementPerPage: 12,
+                direction: "dsc",
+                key:
+                    "surname"))) as EmployeeResponse;
 
         setState(() {
-          employeeList.addAll(newData.employee); // Добавляем новые данные к текущему списку
+          employeeList.addAll(
+              newData.employee);
           this.page++;
         });
       } catch (error) {
         print("Error loading next page: $error");
       } finally {
-        // Устанавливаем isLoading обратно в false, чтобы разрешить следующий запрос
+
         isLoading = false;
       }
     }
   }
 
-
   Future<void> fetchDataAndPrintName() async {
-    // await employeeService.loadEmployee();
     await positionService.loadPosition();
 
     setState(() {
-      // employeeList.addAll(employeeService.getEmployeeList());
       positionList.addAll(positionService.getPositionList());
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-
-
     return WillPopScope(
-      onWillPop: () async {
-        // Ваш код для определения действия при нажатии кнопки "назад"
-        // Например, перенаправление на определенный экран:
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => AppBarApp(), // Замените YourTargetScreen на целевой экран
+        onWillPop: () async {
+
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) =>
+                  AppBarApp(),
+            ),
+          );
+          return false;
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Штат'),
+            centerTitle: true,
           ),
-        );
-        // Возвращаем false, чтобы предотвратить обычное закрытие экрана "назад"
-        return false;
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Штат'),
-          centerTitle: true,
-        ),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: searchController,
-                decoration: InputDecoration(
-                  hintText: 'Поиск...',
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: onSearchTextChanged,
-              ),
-            ),
-            CheckboxListTile(
-              title: Text('Скрыть уволенных:'),
-              value: hideDismissed,
-              onChanged: (newValue) {
-                setState(() {
-                  hideDismissed = newValue!;
-                  // В этом месте вы можете обновить список сотрудников, основываясь на значении hideDismissed
-                  print(hideDismissed);
-                  employeeList.clear();
-                  page = 0;
-                  loadNextPage(page, searchController.text, hideDismissed);
-                });
-              },
-            ),
-            Expanded(
-              child: ListView.builder(
-            controller: _scrollController,
-            itemCount: employeeList.length,
-            itemBuilder: (BuildContext context, int i){
-              return Dismissible(
-                key: Key(employeeList[i].name),
-                child: Card(
-                  child: ListTile(
-                    title: Text(employeeList[i].name + " " + positionService.getPosition(employeeList[i].positionId).name),
-                    trailing: IconButton(
-                      icon: const Icon(
-                        Icons.delete,
-                        color: Colors.red,
-                      ), onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text('Подтвердите удаление'),
-                            content: Text('Вы уверены, что хотите удалить этого сотрудника?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop(); // Закрыть диалог
-                                  // Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
-                                  // );
-                                },
-                                child: Text('Отмена'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  // Вызов метода удаления после подтверждения
-                                  print(employeeList[i].id);
-                                  // employeeService.delete(employeeList[i].id);
-                                  Navigator.of(context).pop(); // Закрыть диалог
-                                },
-                                child: Text('Удалить'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                    ) ,
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Поиск...',
+                    border: OutlineInputBorder(),
                   ),
+                  onChanged: onSearchTextChanged,
                 ),
-                onDismissed: (direction) {
-                  if (direction == DismissDirection.endToStart) {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text('Подтвердите удаление'),
-                          content: Text('Вы уверены, что хотите удалить этого сотрудника?'),
-                          actions: [
-                            TextButton(
+              ),
+              CheckboxListTile(
+                title: Text('Скрыть уволенных:'),
+                value: hideDismissed,
+                onChanged: (newValue) {
+                  setState(() {
+                    hideDismissed = newValue!;
+                    print(hideDismissed);
+                    employeeList.clear();
+                    page = 0;
+                    loadNextPage(page, searchController.text, hideDismissed);
+                  });
+                },
+              ),
+              Expanded(
+                child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: employeeList.length,
+                    itemBuilder: (BuildContext context, int i) {
+                      return Dismissible(
+                        key: Key(employeeList[i].name),
+                        child: Card(
+                          child: ListTile(
+                            title: Text(employeeList[i].name +
+                                " " +
+                                positionService
+                                    .getPosition(employeeList[i].positionId)
+                                    .name),
+                            trailing: IconButton(
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                              ),
                               onPressed: () {
-                                Navigator.of(context).pop(); // Закрыть диалог
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => Employee()), // SecondScreen - ваша целевая страница
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text('Подтвердите удаление'),
+                                      content: Text(
+                                          'Вы уверены, что хотите удалить этого сотрудника?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context)
+                                                .pop(); // Закрыть диалог
+
+                                          },
+                                          child: Text('Отмена'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            // Вызов метода удаления после подтверждения
+                                            print(employeeList[i].id);
+                                            // employeeService.delete(employeeList[i].id);
+                                            Navigator.of(context)
+                                                .pop(); // Закрыть диалог
+                                          },
+                                          child: Text('Удалить'),
+                                        ),
+                                      ],
+                                    );
+                                  },
                                 );
                               },
-                              child: Text('Отмена'),
                             ),
-                            TextButton(
-                              onPressed: () {
-                                // Вызов метода удаления после подтверждения
-                                print(employeeList[i].id);
-                                // employeeService.delete(employeeList[i].id);
-                                Navigator.of(context).pop(); // Закрыть диалог
+                          ),
+                        ),
+                        onDismissed: (direction) {
+                          if (direction == DismissDirection.endToStart) {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('Подтвердите удаление'),
+                                  content: Text(
+                                      'Вы уверены, что хотите удалить этого сотрудника?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context)
+                                            .pop();
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  Employee()),
+                                        );
+                                      },
+                                      child: Text('Отмена'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        // Вызов метода удаления после подтверждения
+                                        print(employeeList[i].id);
+                                        Navigator.of(context)
+                                            .pop(); // Закрыть диалог
+                                      },
+                                      child: Text('Удалить'),
+                                    ),
+                                  ],
+                                );
                               },
-                              child: Text('Удалить'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  }
-                  else{
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => editEmployeeScreen(employee : employeeList[i])), // SecondScreen - ваша целевая страница
-                    );
-                  }
-                },
-              );
-            } //item
-        ),
-      ),
-      ],
-    ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.blue,
-          onPressed: (){
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => addEmployee()), // SecondScreen - ваша целевая страница
-            );
-
-          },
-          child: Icon(
-            Icons.add,
-
+                            );
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => EditEmployeeScreen(
+                                      employee: employeeList[
+                                          i])),
+                            );
+                          }
+                        },
+                      );
+                    } //item
+                    ),
+              ),
+            ],
           ),
-        ),
-
-      )
-
-    );
-
-
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: Colors.blue,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        AddEmployee()), // SecondScreen - ваша целевая страница
+              );
+            },
+            child: Icon(
+              Icons.add,
+            ),
+          ),
+        ));
   }
-  
 }

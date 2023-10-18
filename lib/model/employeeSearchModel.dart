@@ -1,6 +1,4 @@
-
 class EmployeeSearchModel {
-
   String surname;
   bool working;
   int page;
@@ -8,27 +6,27 @@ class EmployeeSearchModel {
   String direction = "dsc";
   String key;
 
-  EmployeeSearchModel({
-    required this.surname,
-    required this.working,
-    required this.page,
-    required this.elementPerPage,
-    required this.direction,
-    required this.key
-  });
+  EmployeeSearchModel(
+      {required this.surname,
+      required this.working,
+      required this.page,
+      required this.elementPerPage,
+      required this.direction,
+      required this.key});
 
   factory EmployeeSearchModel.fromJson(Map<String, dynamic> json) {
     return EmployeeSearchModel(
-        surname:json['surname'],
-        working:json['working'],
-        page:json['working'],
-        elementPerPage:json['elementPerPage'],
-        direction: json['direction'],
-        key:json['key'],
+      surname: json['surname'],
+      working: json['working'],
+      page: json['working'],
+      elementPerPage: json['elementPerPage'],
+      direction: json['direction'],
+      key: json['key'],
     );
   }
 
-  static List<EmployeeSearchModel> fromJsonList(List<Map<String, dynamic>> jsonList) {
+  static List<EmployeeSearchModel> fromJsonList(
+      List<Map<String, dynamic>> jsonList) {
     return jsonList.map((json) => EmployeeSearchModel.fromJson(json)).toList();
   }
 
@@ -42,6 +40,4 @@ class EmployeeSearchModel {
       'key': key,
     };
   }
-
-
 }
