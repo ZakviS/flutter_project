@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 
 import 'package:flutter_project/model/allowanceModel.dart';
@@ -9,30 +10,18 @@ class AllowanceService {
   List<AllowanceModel> allowance = [];
   ApiService api = ApiService();
 
-  Future<void> loadAllowance(int? id) async {
-    responseJson = await api.getSalary(id);
-    // print('Response data: ${response.body}');
+  Future<List<AllowanceModel>> loadAllowance(int? id) async {
+    responseJson = await api.getAllowance(id);
 
     List<Map<String, dynamic>> parsedJson =
         jsonDecode(responseJson).cast<Map<String, dynamic>>();
+
     allowance = AllowanceModel.fromJsonList(parsedJson);
-    // print(salary.length);
+
+    // print(allow.toString());
+    return  AllowanceModel.fromJsonList(parsedJson);
   }
 
-  List<AllowanceModel> getAllowanceList() {
-    // fetchData(token);
-    return allowance;
-  }
-
-  AllowanceModel getAllowance(int id) {
-    for (int i = 0; i < allowance.length; i++) {
-      if (allowance[i].id == id) {
-        return allowance[i];
-      }
-    }
-
-    return allowance[0];
-  }
 
   Future<void> delete(int? id) async {
     await api.deleteAllowance(id);

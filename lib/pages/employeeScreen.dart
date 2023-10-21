@@ -36,9 +36,6 @@ class EmployeeState extends State<Employee> {
   int page = 0;
   bool isLoading = false;
 
-  // int count = 0;
-  // int pageSize = 5;
-  // EmployeeSearchModel(surname: '', working: false, page: 0,  elementPerPage: 5,  direction: "dsc",  key: "surname");
 
   @override
   void initState() {

@@ -127,9 +127,11 @@ class editEmployeeState extends State<EditEmployeeScreen> {
     final employee = this.employee;
     await salaryService.loadSalary(employee?.id);
     await premiumService.loadPremium(employee?.id);
+    allowanceList = await allowanceService.loadAllowance(employee?.id);
 
     premiumList.addAll(premiumService.getPremiumList());
     salaryList.addAll(salaryService.getSalaryList());
+    // allowanceList.addAll(allowanceService.getAllowanceList());
     if (employee != null) {
       text1 = employee.name;
       text2 = employee.secondSurname;
@@ -838,13 +840,13 @@ class editEmployeeState extends State<EditEmployeeScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  salaryService.add(
+                  allowanceService.add(
                       "token",
-                      SalaryModel(
+                      AllowanceModel(
                           id: null,
                           sum: int.tryParse(allowanceSum),
                           dateOfSalary: dateOfAllowance,
-                          numbOfOrder: int.tryParse(allowanceNumb),
+                          numberOfOrder: int.tryParse(allowanceNumb),
                           dateOfOrder: dateOfAllowOrder,
                           employeeId: employee?.id));
 
@@ -868,41 +870,38 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                 itemBuilder: (BuildContext context) {
                   return allowanceList.map((AllowanceModel allowance) {
                     return PopupMenuItem<String>(
-                      value: allowance.numbOfOrder.toString(),
+                      value: allowance.numberOfOrder.toString(),
                       // Предположим, что у SalaryModel есть поле someValue
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text("номер приказа: " +
-                              allowance.numbOfOrder.toString()),
+                              allowance.numberOfOrder.toString()),
                           // Отображаем название элемента
                           Row(
                             children: [
                               IconButton(
                                 icon: Icon(Icons.edit), // Кнопка редактирования
                                 onPressed: () async {
-                                  final PremiumModel result = await showDialog(
+                                  final AllowanceModel result = await showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
                                       return EditAllowancePopup(
-                                          id: employee?.id);
+                                          allowanceModel: allowance /*employee?.id,*/);
                                     },
                                   );
                                   if (result != null) {
-                                    // Вот ваш код после закрытия всплывающего окна с результатом.
-                                    // Например, можно обновить состояние родительского виджета с полученными данными.
+
                                     setState(() {
-                                      // Обновите состояние с полученными данными из всплывающего окна.
-                                      // Например, вы можете использовать эти данные для перерисовки или обновления виджета.
+
                                       allowance.sum = result.sum;
-                                      allowance.numbOfOrder =
-                                          result.numbOfOrder;
+                                      allowance.numberOfOrder =
+                                          result.numberOfOrder;
                                       allowance.dateOfSalary =
                                           result.dateOfSalary;
                                       allowance.dateOfOrder =
                                           result.dateOfOrder;
 
-                                      // ... остальные данные ...
                                     });
                                   }
                                 },

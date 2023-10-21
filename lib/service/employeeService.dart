@@ -11,19 +11,7 @@ class EmployeeService {
   List<EmployeeModel> employees = [];
   ApiService api = ApiService();
 
-  Future<void> loadEmployee() async {
-    responseJson = await api.getEmployee();
 
-    // EmployeeSearchModel('', false, 0, 10, "dsc", "surname");
-    List<Map<String, dynamic>> parsedJson =
-        jsonDecode(responseJson).cast<Map<String, dynamic>>();
-    employees = EmployeeModel.fromJsonList(parsedJson);
-  }
-
-  List<EmployeeModel> getEmployeeList() {
-    // fetchData(token);
-    return employees;
-  }
 
   Future<void> delete(int? id) async {
     await api.deleteEmployee(id);

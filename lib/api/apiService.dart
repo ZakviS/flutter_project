@@ -252,7 +252,7 @@ class ApiService {
   }
 
   Future<String> getAllowance(int? id) async {
-    final url = Uri.parse('$baseUrl/premium/get/$id');
+    final url = Uri.parse('$baseUrl/allowance/get/$id');
 
     final response = await http.get(
       url,
@@ -269,7 +269,7 @@ class ApiService {
   }
 
   Future<void> deleteAllowance(int? id) async {
-    final url = Uri.parse('$baseUrl/premium/delete/$id');
+    final url = Uri.parse('$baseUrl/allowance/delete/$id');
 
     final response = await http.delete(
       url,
@@ -286,7 +286,7 @@ class ApiService {
   }
 
   Future<String> addAllowance(AllowanceModel allowanceModel) async {
-    final url = Uri.parse('$baseUrl/premium/add');
+    final url = Uri.parse('$baseUrl/allowance/add');
 
     final response = await http.post(
       url,
@@ -306,7 +306,7 @@ class ApiService {
   }
 
   Future<String> editAllowance(AllowanceModel allowanceModel, int id) async {
-    final url = Uri.parse('$baseUrl/premium/edit/$id');
+    final url = Uri.parse('$baseUrl/allowance/edit/$id');
 
     final response = await http.put(
       url,

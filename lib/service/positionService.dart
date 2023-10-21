@@ -27,7 +27,6 @@ class PositionService {
         return position[i];
       }
     }
-
     return position[0];
   }
 }
