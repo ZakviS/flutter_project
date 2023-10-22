@@ -1,12 +1,21 @@
 import 'dart:convert';
 
-import '../model/positionModel.dart';
+import 'package:flutter_project/api/apiModel.dart';
 import '../api/apiService.dart';
 
 class PositionService {
   String responseJson = "";
   List<PositionModel> position = [];
   ApiService api = ApiService();
+
+  static final PositionService _instance = PositionService._internal();
+
+  PositionService._internal();
+
+  factory PositionService() {
+    return _instance;
+  }
+
 
   Future<void> loadPosition() async {
     responseJson = await api.getPosition();
@@ -17,7 +26,6 @@ class PositionService {
   }
 
   List<PositionModel> getPositionList() {
-    // fetchData(token);
     return position;
   }
 

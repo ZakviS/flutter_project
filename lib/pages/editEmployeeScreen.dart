@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/model/allowanceModel.dart';
-import 'package:flutter_project/model/employeeModel.dart';
-import 'package:flutter_project/model/positionModel.dart';
-import 'package:flutter_project/model/salaryModel.dart';
-import 'package:flutter_project/service/allowanceService.dart';
-import 'package:flutter_project/service/employeeService.dart';
+import 'package:flutter_project/api/apiModel.dart';
 import 'package:flutter_project/service/positionService.dart';
-import 'package:flutter_project/service/premiumService.dart';
-import 'package:flutter_project/service/salaryService.dart';
+
 import 'package:flutter_project/pages/employeeScreen.dart';
 import 'package:flutter_project/pages/premiumEditScreen.dart';
 import 'package:flutter_project/pages/salaryEditScreen.dart';
 
-import '../model/premiumModel.dart';
+import '../api/apiService.dart';
 import 'allowanceEditScreen.dart';
 
 class EditEmployeeScreen extends StatefulWidget {
@@ -23,25 +17,22 @@ class EditEmployeeScreen extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return editEmployeeState();
+    return EditEmployeeState();
   }
 }
 
-class editEmployeeState extends State<EditEmployeeScreen> {
-  final employeeService = EmployeeService();
+class EditEmployeeState extends State<EditEmployeeScreen> {
   final positionService = PositionService();
-  final salaryService = SalaryService();
-  final premiumService = PremiumService();
-  final allowanceService = AllowanceService();
+  final apiService = ApiService();
+
 
   List<PositionModel> positionList = [];
   List<SalaryModel> salaryList = [];
   List<PremiumModel> premiumList = [];
   List<AllowanceModel> allowanceList = [];
-  PositionModel? selectedPosition;
+  PositionModel? selectedPosition ;
   EmployeeModel? employee;
 
-  //контроллеры для подставления текста в поля
   TextEditingController nameController = TextEditingController();
   TextEditingController surnameController = TextEditingController();
   TextEditingController secondSurnameController = TextEditingController();
@@ -51,7 +42,6 @@ class editEmployeeState extends State<EditEmployeeScreen> {
   TextEditingController dismissalFieldController = TextEditingController();
   TextEditingController positionFieldController = TextEditingController();
 
-  //поля для сохранения сотрудников
   String text1 = '';
   String text2 = '';
   String text3 = '';
@@ -94,7 +84,7 @@ class editEmployeeState extends State<EditEmployeeScreen> {
   void initState() {
     super.initState();
     employee = widget.employee;
-    // fetchDataAndPrintName();
+    selectedPosition = positionService.getPosition(employee!.positionId);
     initFields();
   }
 
@@ -110,28 +100,24 @@ class editEmployeeState extends State<EditEmployeeScreen> {
           '${employee!.beginning.toLocal()}'.split(' ')[0];
       dismissalFieldController.text =
           '${employee!.dismissal?.toLocal()}'.split(' ')[0];
-      selectedPosition = positionService.getPosition(employee!.positionId);
     }
   }
 
   Future<void> fetchDataAndPrintName() async {
-    await positionService.loadPosition();
 
     positionList.clear();
-    // salaryList.clear();
 
     setState(() {
       positionList.addAll(positionService.getPositionList());
     });
 
     final employee = this.employee;
-    await salaryService.loadSalary(employee?.id);
-    await premiumService.loadPremium(employee?.id);
-    allowanceList = await allowanceService.loadAllowance(employee?.id);
 
-    premiumList.addAll(premiumService.getPremiumList());
-    salaryList.addAll(salaryService.getSalaryList());
-    // allowanceList.addAll(allowanceService.getAllowanceList());
+
+    allowanceList = await apiService.getAllowance(employee?.id);
+    salaryList =  await apiService.getSalary(employee?.id);
+    premiumList = await apiService.getPremium(employee?.id);
+
     if (employee != null) {
       text1 = employee.name;
       text2 = employee.secondSurname;
@@ -143,19 +129,26 @@ class editEmployeeState extends State<EditEmployeeScreen> {
     }
   }
 
+  void deleteAllowanceAndUpdateScreen(int? allowanceId) {
+    // Выполните удаление элемента из списка
+    allowanceList.removeWhere((allowance) => allowance.id == allowanceId);
+
+    // Вызов setState, чтобы перерисовать экран
+    setState(() {});
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // Ваш код для определения действия при нажатии кнопки "назад"
-        // Например, перенаправление на определенный экран:
+
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) =>
-                Employee(), // Замените YourTargetScreen на целевой экран
+                Employee(),
           ),
         );
-        // Возвращаем false, чтобы предотвратить обычное закрытие экрана "назад"
         return false;
       },
       child: Scaffold(
@@ -275,15 +268,15 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                 },
               ),
               // Выпадающий список
-
               DropdownButton<PositionModel>(
                 value: selectedPosition,
+
                 onChanged: (PositionModel? newValue) {
-                  // Обратите внимание на тип String?
-                  if (newValue != null) {
-                    // Проверка на null
+                  if (newValue != null && newValue != positionService.getPosition(employee!.positionId)) {
+                    print(newValue.name);
                     setState(() {
                       selectedPosition = newValue;
+                      print(selectedPosition?.name);
                     });
                   }
                 },
@@ -296,8 +289,6 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                 }).toList(),
               ),
 
-              // Кнопка для отправки данных (просто пример)
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -307,19 +298,17 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                Employee()), // SecondScreen - ваша целевая страница
+                                Employee()),
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey, // Устанавливаем цвет кнопки
+                      backgroundColor: Colors.grey,
                     ),
                     child: Text('Отмена'),
                   ),
                   SizedBox(width: 30),
                   ElevatedButton(
                     onPressed: () {
-                      // Здесь можно отправить данные на сервер или выполнить другие действия
-                      // Используйте значения text1, text2, и так далее
 
                       EmployeeModel employee = EmployeeModel(
                           id: this.employee?.id,
@@ -331,17 +320,16 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                           phoneNumber: text4,
                           email: text5,
                           positionId: selectedPosition!.id);
-                      employeeService.edit("token", employee, 5);
+                      apiService.editEmployee( employee, 5);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                Employee()), // SecondScreen - ваша целевая страница
+                                Employee()),
                       );
                     },
                     child: Text('Отправить данные'),
                   ),
-                  // Пространство между кнопками
                 ],
               ),
 
@@ -349,19 +337,16 @@ class editEmployeeState extends State<EditEmployeeScreen> {
               SizedBox(height: 30),
               const Text(
                 "Зарплата",
-                // Указываем стиль текста с увеличенным размером шрифта
                 style: TextStyle(
-                  fontSize: 15, // Устанавливаем размер шрифта в пунктах
+                  fontSize: 15,
                   fontWeight:
-                      FontWeight.bold, // Жирный стиль текста (по желанию)
-                  // Другие настройки стиля текста, если необходимо
+                      FontWeight.bold,
                 ),
               ),
               Row(
                 children: [
                   Container(
                     width: MediaQuery.of(context).size.width / 2 - 24,
-                    // Установите желаемую фиксированную ширину
                     child: TextFormField(
                       controller: salarySumController,
                       onChanged: (value) {
@@ -374,10 +359,9 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 16.0), // Добавьте отступ между элементами
+                  SizedBox(width: 16.0),
                   Container(
                     width: MediaQuery.of(context).size.width / 2 - 24,
-                    // Установите желаемую фиксированную ширину
                     child: GestureDetector(
                       onTap: () async {
                         final DateTime? pickedDate = await showDatePicker(
@@ -407,7 +391,6 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                 children: [
                   Container(
                     width: MediaQuery.of(context).size.width / 2 - 24,
-                    // Установите желаемую фиксированную ширину
                     child: TextFormField(
                       controller: salaryNumbController,
                       onChanged: (value) {
@@ -420,10 +403,9 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 16.0), // Добавьте отступ между элементами
+                  SizedBox(width: 16.0),
                   Container(
                     width: MediaQuery.of(context).size.width / 2 - 24,
-                    // Установите желаемую фиксированную ширину
                     child: GestureDetector(
                       onTap: () async {
                         final DateTime? pickedDate = await showDatePicker(
@@ -451,20 +433,12 @@ class editEmployeeState extends State<EditEmployeeScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  // Здесь можно отправить данные на сервер или выполнить другие действия
-                  // Используйте значения text1, text2, и так далее
-                  print('Имя: $salarySum');
-                  print('Фамилия: $salaryNumb');
-                  print('Отчество: $dateOfSalary');
-                  print('Телефон: $dateOfSalOrder');
-
-                  salaryService.add(
-                      "token",
-                      SalaryModel(
+                  apiService.addSalary(
+                          SalaryModel(
                           id: null,
                           sum: int.tryParse(salarySum),
                           dateOfSalary: dateOfSalary,
-                          numbOfOrder: int.tryParse(salaryNumb),
+                          numberOfOrder: int.tryParse(salaryNumb),
                           dateOfOrder: dateOfSalOrder,
                           employeeId: employee?.id));
 
@@ -472,49 +446,39 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            Employee()), // SecondScreen - ваша целевая страница
+                            Employee()),
                   );
-                  // Navigator.pushNamed(context, '/employee',);
-                  // Future.delayed(Duration.zero, () {});
                 },
                 child: Text('Отправить данные'),
               ),
               PopupMenuButton<String>(
                 onSelected: (String value) {
-                  // setState(() {
-                  //   selectedValue = value; // Обновляем выбранное значение
-                  // });
+
                 },
                 itemBuilder: (BuildContext context) {
                   return salaryList.map((SalaryModel salary) {
                     return PopupMenuItem<String>(
-                      value: salary.numbOfOrder.toString(),
-                      // Предположим, что у SalaryModel есть поле someValue
+                      value: salary.numberOfOrder.toString(),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text("номер приказа: " +
-                              salary.numbOfOrder.toString()),
-                          // Отображаем название элемента
+                              salary.numberOfOrder.toString()),
                           Row(
                             children: [
                               IconButton(
-                                icon: Icon(Icons.edit), // Кнопка редактирования
+                                icon: Icon(Icons.edit),
                                 onPressed: () async {
                                   final SalaryModel result = await showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
-                                      return EditSalaryPopup(id: employee?.id);
+                                      return EditSalaryPopup(salaryModel: salary);
                                     },
                                   );
                                   if (result != null) {
-                                    // Вот ваш код после закрытия всплывающего окна с результатом.
-                                    // Например, можно обновить состояние родительского виджета с полученными данными.
                                     setState(() {
-                                      // Обновите состояние с полученными данными из всплывающего окна.
-                                      // Например, вы можете использовать эти данные для перерисовки или обновления виджета.
                                       salary.sum = result.sum;
-                                      salary.numbOfOrder = result.numbOfOrder;
+                                      salary.numberOfOrder = result.numberOfOrder;
                                       salary.dateOfSalary = result.dateOfSalary;
                                       salary.dateOfOrder = result.dateOfOrder;
 
@@ -526,7 +490,6 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                               IconButton(
                                 icon: Icon(Icons.delete), // Кнопка удаления
                                 onPressed: () {
-                                  // Обработчик нажатия на кнопку удаления
                                 },
                               ),
                             ],
@@ -536,26 +499,23 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                     );
                   }).toList();
                 },
-                child: Text("Посмотреть историю"), // Текст кнопки
+                child: Text("Посмотреть историю"),
               ),
 
               //premium
               SizedBox(height: 30),
               const Text(
                 "Премия",
-                // Указываем стиль текста с увеличенным размером шрифта
                 style: TextStyle(
-                  fontSize: 15, // Устанавливаем размер шрифта в пунктах
+                  fontSize: 15,
                   fontWeight:
-                      FontWeight.bold, // Жирный стиль текста (по желанию)
-                  // Другие настройки стиля текста, если необходимо
+                      FontWeight.bold,
                 ),
               ),
               Row(
                 children: [
                   Container(
                     width: MediaQuery.of(context).size.width / 2 - 24,
-                    // Установите желаемую фиксированную ширину
                     child: TextFormField(
                       controller: premiumSumController,
                       onChanged: (value) {
@@ -568,10 +528,9 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 16.0), // Добавьте отступ между элементами
+                  SizedBox(width: 16.0),
                   Container(
                     width: MediaQuery.of(context).size.width / 2 - 24,
-                    // Установите желаемую фиксированную ширину
                     child: GestureDetector(
                       onTap: () async {
                         final DateTime? pickedDate = await showDatePicker(
@@ -601,7 +560,6 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                 children: [
                   Container(
                     width: MediaQuery.of(context).size.width / 2 - 24,
-                    // Установите желаемую фиксированную ширину
                     child: TextFormField(
                       controller: premiumNumbController,
                       onChanged: (value) {
@@ -614,10 +572,9 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 16.0), // Добавьте отступ между элементами
+                  SizedBox(width: 16.0),
                   Container(
                     width: MediaQuery.of(context).size.width / 2 - 24,
-                    // Установите желаемую фиксированную ширину
                     child: GestureDetector(
                       onTap: () async {
                         final DateTime? pickedDate = await showDatePicker(
@@ -644,20 +601,17 @@ class editEmployeeState extends State<EditEmployeeScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  // Здесь можно отправить данные на сервер или выполнить другие действия
-                  // Используйте значения text1, text2, и так далее
                   print('Имя: $premiumSum');
                   print('Фамилия: $premiumNumb');
                   print('Отчество: $dateOfPremium');
                   print('Телефон: $dateOfPremOrder');
 
-                  salaryService.add(
-                      "token",
-                      SalaryModel(
+                  apiService.addPremium(
+                      PremiumModel(
                           id: null,
                           sum: int.tryParse(premiumSum),
                           dateOfSalary: dateOfPremium,
-                          numbOfOrder: int.tryParse(premiumNumb),
+                          numberOfOrder: int.tryParse(premiumNumb),
                           dateOfOrder: dateOfPremOrder,
                           employeeId: employee?.id));
 
@@ -665,62 +619,50 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            Employee()), // SecondScreen - ваша целевая страница
+                            Employee()),
                   );
-                  // Navigator.pushNamed(context, '/employee',);
-                  // Future.delayed(Duration.zero, () {});
+
                 },
                 child: Text('Отправить данные'),
               ),
               PopupMenuButton<String>(
                 onSelected: (String value) {
-                  // setState(() {
-                  //   selectedValue = value; // Обновляем выбранное значение
-                  // });
                 },
                 itemBuilder: (BuildContext context) {
                   return premiumList.map((PremiumModel premium) {
                     return PopupMenuItem<String>(
-                      value: premium.numbOfOrder.toString(),
-                      // Предположим, что у SalaryModel есть поле someValue
+                      value: premium.numberOfOrder.toString(),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text("номер приказа: " +
-                              premium.numbOfOrder.toString()),
-                          // Отображаем название элемента
+                              premium.numberOfOrder.toString()),
                           Row(
                             children: [
                               IconButton(
-                                icon: Icon(Icons.edit), // Кнопка редактирования
+                                icon: Icon(Icons.edit),
                                 onPressed: () async {
                                   final PremiumModel result = await showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
-                                      return EditPremiumPopup(id: employee?.id);
+                                      return EditPremiumPopup(premiumModel: premium);
                                     },
                                   );
                                   if (result != null) {
-                                    // Вот ваш код после закрытия всплывающего окна с результатом.
-                                    // Например, можно обновить состояние родительского виджета с полученными данными.
                                     setState(() {
-                                      // Обновите состояние с полученными данными из всплывающего окна.
-                                      // Например, вы можете использовать эти данные для перерисовки или обновления виджета.
                                       premium.sum = result.sum;
-                                      premium.numbOfOrder = result.numbOfOrder;
+                                      premium.numberOfOrder = result.numberOfOrder;
                                       premium.dateOfSalary =
                                           result.dateOfSalary;
                                       premium.dateOfOrder = result.dateOfOrder;
 
-                                      // ... остальные данные ...
                                     });
                                   }
                                 },
                               ),
                               IconButton(
-                                icon: Icon(Icons.delete), // Кнопка удаления
+                                icon: Icon(Icons.delete),
                                 onPressed: () {
-                                  // Обработчик нажатия на кнопку удаления
                                 },
                               ),
                             ],
@@ -737,19 +679,16 @@ class editEmployeeState extends State<EditEmployeeScreen> {
               SizedBox(height: 30),
               const Text(
                 "Надбавка",
-                // Указываем стиль текста с увеличенным размером шрифта
                 style: TextStyle(
-                  fontSize: 15, // Устанавливаем размер шрифта в пунктах
+                  fontSize: 15,
                   fontWeight:
-                      FontWeight.bold, // Жирный стиль текста (по желанию)
-                  // Другие настройки стиля текста, если необходимо
+                      FontWeight.bold,
                 ),
               ),
               Row(
                 children: [
                   Container(
                     width: MediaQuery.of(context).size.width / 2 - 24,
-                    // Установите желаемую фиксированную ширину
                     child: TextFormField(
                       controller: allowanceSumController,
                       onChanged: (value) {
@@ -762,10 +701,9 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 16.0), // Добавьте отступ между элементами
+                  SizedBox(width: 16.0),
                   Container(
                     width: MediaQuery.of(context).size.width / 2 - 24,
-                    // Установите желаемую фиксированную ширину
                     child: GestureDetector(
                       onTap: () async {
                         final DateTime? pickedDate = await showDatePicker(
@@ -795,7 +733,6 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                 children: [
                   Container(
                     width: MediaQuery.of(context).size.width / 2 - 24,
-                    // Установите желаемую фиксированную ширину
                     child: TextFormField(
                       controller: allowanceNumbController,
                       onChanged: (value) {
@@ -808,10 +745,9 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 16.0), // Добавьте отступ между элементами
+                  SizedBox(width: 16.0),
                   Container(
                     width: MediaQuery.of(context).size.width / 2 - 24,
-                    // Установите желаемую фиксированную ширину
                     child: GestureDetector(
                       onTap: () async {
                         final DateTime? pickedDate = await showDatePicker(
@@ -840,9 +776,8 @@ class editEmployeeState extends State<EditEmployeeScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  allowanceService.add(
-                      "token",
-                      AllowanceModel(
+                  apiService.addAllowance(
+                          AllowanceModel(
                           id: null,
                           sum: int.tryParse(allowanceSum),
                           dateOfSalary: dateOfAllowance,
@@ -854,34 +789,27 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            Employee()), // SecondScreen - ваша целевая страница
+                            Employee()),
                   );
-                  // Navigator.pushNamed(context, '/employee',);
-                  // Future.delayed(Duration.zero, () {});
                 },
                 child: Text('Отправить данные'),
               ),
               PopupMenuButton<String>(
                 onSelected: (String value) {
-                  // setState(() {
-                  //   selectedValue = value; // Обновляем выбранное значение
-                  // });
                 },
                 itemBuilder: (BuildContext context) {
                   return allowanceList.map((AllowanceModel allowance) {
                     return PopupMenuItem<String>(
                       value: allowance.numberOfOrder.toString(),
-                      // Предположим, что у SalaryModel есть поле someValue
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text("номер приказа: " +
                               allowance.numberOfOrder.toString()),
-                          // Отображаем название элемента
                           Row(
                             children: [
                               IconButton(
-                                icon: Icon(Icons.edit), // Кнопка редактирования
+                                icon: Icon(Icons.edit),
                                 onPressed: () async {
                                   final AllowanceModel result = await showDialog(
                                     context: context,
@@ -908,8 +836,10 @@ class editEmployeeState extends State<EditEmployeeScreen> {
                               ),
                               IconButton(
                                 icon: Icon(Icons.delete), // Кнопка удаления
-                                onPressed: () {
-                                  // Обработчик нажатия на кнопку удаления
+                                onPressed: () async {
+                                  apiService.deleteAllowance(allowance.id);
+                                  deleteAllowanceAndUpdateScreen(allowance.id);
+
                                 },
                               ),
                             ],

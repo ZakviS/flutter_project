@@ -1,32 +1,31 @@
 import 'dart:convert';
 
-import 'package:flutter_project/model/allowanceModel.dart';
-import 'package:flutter_project/model/premiumModel.dart';
-import 'package:flutter_project/model/salaryModel.dart';
+import 'package:flutter_project/api/apiModel.dart';
 import 'package:http/http.dart' as http;
 
-import '../model/employeeModel.dart';
-import '../model/employeeResponse.dart';
-import '../model/employeeSearchModel.dart';
 
 class ApiService {
   final String baseUrl = "http://localhost:8080";
   final String token = "asd";
 
-  Future<String> getEmployee() async {
-    final url = Uri.parse('$baseUrl/employee/get');
 
-    final response = await http.get(
+  Future<EmployeeResponse> searchEmployee(
+      EmployeeSearchModel employeeSearchModel) async {
+    final url = Uri.parse('$baseUrl/employee/search');
+
+    final response = await http.post(
       url,
-      headers: {
+      headers: <String, String>{
         'Authorization': '$token',
+        'Content-Type': 'application/json',
       },
+      body: jsonEncode(employeeSearchModel),
     );
 
     if (response.statusCode == 200) {
-      return response.body;
+      return EmployeeResponse.fromJson(json.decode(response.body));
     } else {
-      throw Exception('Request failed with status: ${response.statusCode}');
+      throw Exception('Failed to load employee response');
     }
   }
 
@@ -104,7 +103,7 @@ class ApiService {
     }
   }
 
-  Future<String> getSalary(int? id) async {
+  Future<List<SalaryModel>> getSalary(int? id) async {
     final url = Uri.parse('$baseUrl/salary/get/$id');
 
     final response = await http.get(
@@ -115,7 +114,9 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      return response.body;
+      List<Map<String, dynamic>> parsedJson =
+      jsonDecode(response.body).cast<Map<String, dynamic>>();
+      return SalaryModel.fromJsonList(parsedJson);
     } else {
       throw Exception('Request failed with status: ${response.statusCode}');
     }
@@ -177,7 +178,7 @@ class ApiService {
     }
   }
 
-  Future<String> getPremium(int? id) async {
+  Future<List<PremiumModel>> getPremium(int? id) async {
     final url = Uri.parse('$baseUrl/premium/get/$id');
 
     final response = await http.get(
@@ -188,7 +189,9 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      return response.body;
+      List<Map<String, dynamic>> parsedJson =
+      jsonDecode(response.body).cast<Map<String, dynamic>>();
+      return PremiumModel.fromJsonList(parsedJson);
     } else {
       throw Exception('Request failed with status: ${response.statusCode}');
     }
@@ -251,7 +254,7 @@ class ApiService {
     }
   }
 
-  Future<String> getAllowance(int? id) async {
+  Future<List<AllowanceModel>> getAllowance(int? id) async {
     final url = Uri.parse('$baseUrl/allowance/get/$id');
 
     final response = await http.get(
@@ -262,7 +265,10 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      return response.body;
+      List<Map<String, dynamic>> parsedJson =
+      jsonDecode(response.body).cast<Map<String, dynamic>>();
+
+      return  AllowanceModel.fromJsonList(parsedJson);
     } else {
       throw Exception('Request failed with status: ${response.statusCode}');
     }
@@ -298,7 +304,7 @@ class ApiService {
     );
 
     if (response.statusCode == 201) {
-      return response.body;
+      return  response.body;
     } else {
       print('Request failed with status: ${response.statusCode}');
       throw Exception('Request failed with status: ${response.statusCode}');
@@ -318,30 +324,12 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      return response.body;
+      return  response.body;
     } else {
       print('Request failed with status: ${response.statusCode}');
       throw Exception('Request failed with status: ${response.statusCode}');
     }
   }
 
-  Future<EmployeeResponse> searchEmployee(
-      EmployeeSearchModel employeeSearchModel) async {
-    final url = Uri.parse('$baseUrl/employee/search');
 
-    final response = await http.post(
-      url,
-      headers: <String, String>{
-        'Authorization': '$token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(employeeSearchModel),
-    );
-
-    if (response.statusCode == 200) {
-      return EmployeeResponse.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to load employee response');
-    }
-  }
 }

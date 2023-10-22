@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/model/employeeModel.dart';
 import 'package:flutter_project/api/apiModel.dart';
-import 'package:flutter_project/model/positionModel.dart';
-import 'package:flutter_project/service/employeeService.dart';
+import 'package:flutter_project/api/apiService.dart';
 import 'package:flutter_project/service/positionService.dart';
 import 'package:flutter_project/pages/employeeScreen.dart';
 
@@ -13,13 +11,13 @@ class AddEmployee extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return addEmployeeState();
+    return AddEmployeeState();
   }
 }
 
-class addEmployeeState extends State<AddEmployee> {
-  final employeeService = EmployeeService();
+class AddEmployeeState extends State<AddEmployee> {
   final positionService = PositionService();
+  final apiService = ApiService();
   List<PositionModel> positionList = [];
   List<EmployeeModel> employeeList = [];
   PositionModel? selectedPosition;
@@ -31,8 +29,6 @@ class addEmployeeState extends State<AddEmployee> {
   }
 
   Future<void> fetchDataAndPrintName() async {
-    await positionService.loadPosition();
-
     setState(() {
       positionList.addAll(positionService.getPositionList());
     });
@@ -173,15 +169,13 @@ class addEmployeeState extends State<AddEmployee> {
                       phoneNumber: text4,
                       email: text5,
                       positionId: 1);
-                  employeeService.add("token", employee);
+                  apiService.addEmployee(employee);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            Employee()), // SecondScreen - ваша целевая страница
+                            Employee()),
                   );
-                  // Navigator.pushNamed(context, '/employee',);
-                  // Future.delayed(Duration.zero, () {});
                 },
                 child: Text('Отправить данные'),
               ),

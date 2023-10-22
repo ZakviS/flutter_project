@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/model/salaryModel.dart';
-import 'package:flutter_project/service/salaryService.dart';
+import 'package:flutter_project/api/apiModel.dart';
+
+import '../api/apiService.dart';
 
 class EditSalaryPopup extends StatefulWidget {
-  final int? id;
+  final SalaryModel salaryModel;
 
-  const EditSalaryPopup({Key? key, required this.id}) : super(key: key);
+  const EditSalaryPopup({Key? key, required this.salaryModel}) : super(key: key);
 
   @override
   _EditPopupState createState() => _EditPopupState();
 }
 
 class _EditPopupState extends State<EditSalaryPopup> {
-  final salaryService = SalaryService();
+  final apiService = ApiService();
   int? id;
   SalaryModel? salary;
 
@@ -31,40 +32,29 @@ class _EditPopupState extends State<EditSalaryPopup> {
   @override
   void initState() {
     super.initState();
-    id = widget.id;
+    super.initState();
+    this.salary = widget.salaryModel;
+    final salary = this.salary;
+    if (salary != null) {
+      text1 = salary.sum;
+      text2 = salary.numberOfOrder;
+      date1 = salary.dateOfSalary;
+      date2 = salary.dateOfOrder;
+    }
     initFields();
-    // fetchDataAndPrintName();
   }
 
   Future<void> initFields() async {
-    await fetchDataAndPrintName();
     if (salary != null) {
       textController1.text = salary!.sum.toString();
-      textController2.text = salary!.numbOfOrder.toString();
+      textController2.text = salary!.numberOfOrder.toString();
 
       date1Controller.text = '${salary!.dateOfSalary?.toLocal()}'.split(' ')[0];
       date2Controller.text = '${salary!.dateOfOrder?.toLocal()}'.split(' ')[0];
     }
   }
 
-  Future<void> fetchDataAndPrintName() async {
-    await salaryService.loadSalary(id);
 
-    // salaryList.clear();
-
-    setState(() {
-      this.salary = salaryService.getSalary(id!);
-      // print(salary?.sum);
-    });
-
-    final salary = this.salary;
-    if (salary != null) {
-      text1 = salary.sum;
-      text2 = salary.numbOfOrder;
-      date1 = salary.dateOfSalary;
-      date2 = salary.dateOfOrder;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,21 +124,18 @@ class _EditPopupState extends State<EditSalaryPopup> {
       actions: [
         TextButton(
           onPressed: () {
-            // Обработчик нажатия на кнопку отмены
-            Navigator.of(context).pop(); // Закрыть всплывающее окно
+            Navigator.of(context).pop();
           },
           child: Text("Отмена"),
         ),
         ElevatedButton(
           onPressed: () {
-            // Обработчик нажатия на кнопку сохранения
-            salaryService.edit(
-                "token",
+            apiService.editSalary(
                 SalaryModel(
                     id: salary!.id,
                     sum: text1,
                     dateOfSalary: date1,
-                    numbOfOrder: text2,
+                    numberOfOrder: text2,
                     dateOfOrder: date2,
                     employeeId: salary?.employeeId),
                 5);
@@ -156,7 +143,7 @@ class _EditPopupState extends State<EditSalaryPopup> {
                 id: salary!.id,
                 sum: text1,
                 dateOfSalary: date1,
-                numbOfOrder: text2,
+                numberOfOrder: text2,
                 dateOfOrder: date2,
                 employeeId: salary?.employeeId);
             Navigator.of(context).pop(result);

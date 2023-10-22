@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/model/premiumModel.dart';
-import 'package:flutter_project/service/premiumService.dart';
+import 'package:flutter_project/api/apiModel.dart';
+
+import '../api/apiService.dart';
 
 class EditPremiumPopup extends StatefulWidget {
-  final int? id;
+  final PremiumModel premiumModel;
 
-  const EditPremiumPopup({Key? key, required this.id}) : super(key: key);
+  const EditPremiumPopup({Key? key, required this.premiumModel}) : super(key: key);
+
 
   @override
   _EditPopupState createState() => _EditPopupState();
 }
 
 class _EditPopupState extends State<EditPremiumPopup> {
-  final premiumService = PremiumService();
+  final apiService = ApiService();
   int? id;
   PremiumModel? premium;
 
@@ -31,16 +33,22 @@ class _EditPopupState extends State<EditPremiumPopup> {
   @override
   void initState() {
     super.initState();
-    id = widget.id;
+    this.premium = widget.premiumModel;
+    final premium = this.premium;
+    if (premium != null) {
+      text1 = premium.sum;
+      text2 = premium.numberOfOrder;
+      date1 = premium.dateOfSalary;
+      date2 = premium.dateOfOrder;
+    }
     initFields();
     // fetchDataAndPrintName();
   }
 
   Future<void> initFields() async {
-    await fetchDataAndPrintName();
     if (premium != null) {
       textController1.text = premium!.sum.toString();
-      textController2.text = premium!.numbOfOrder.toString();
+      textController2.text = premium!.numberOfOrder.toString();
 
       date1Controller.text =
           '${premium!.dateOfSalary?.toLocal()}'.split(' ')[0];
@@ -48,24 +56,7 @@ class _EditPopupState extends State<EditPremiumPopup> {
     }
   }
 
-  Future<void> fetchDataAndPrintName() async {
-    await premiumService.loadPremium(id);
-
-    // salaryList.clear();
-
-    setState(() {
-      this.premium = premiumService.getPremium(id!);
-      // print(salary?.sum);
-    });
-
-    final salary = this.premium;
-    if (salary != null) {
-      text1 = salary.sum;
-      text2 = salary.numbOfOrder;
-      date1 = salary.dateOfSalary;
-      date2 = salary.dateOfOrder;
-    }
-  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -135,21 +126,18 @@ class _EditPopupState extends State<EditPremiumPopup> {
       actions: [
         TextButton(
           onPressed: () {
-            // Обработчик нажатия на кнопку отмены
-            Navigator.of(context).pop(); // Закрыть всплывающее окно
+            Navigator.of(context).pop();
           },
           child: Text("Отмена"),
         ),
         ElevatedButton(
           onPressed: () {
-            // Обработчик нажатия на кнопку сохранения
-            premiumService.edit(
-                "token",
+            apiService.editPremium(
                 PremiumModel(
                     id: premium!.id,
                     sum: text1,
                     dateOfSalary: date1,
-                    numbOfOrder: text2,
+                    numberOfOrder: text2,
                     dateOfOrder: date2,
                     employeeId: premium?.employeeId),
                 5);
@@ -157,7 +145,7 @@ class _EditPopupState extends State<EditPremiumPopup> {
                 id: premium!.id,
                 sum: text1,
                 dateOfSalary: date1,
-                numbOfOrder: text2,
+                numberOfOrder: text2,
                 dateOfOrder: date2,
                 employeeId: premium?.employeeId);
             Navigator.of(context).pop(result);

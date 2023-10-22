@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/model/allowanceModel.dart';
-import 'package:flutter_project/service/allowanceService.dart';
+import 'package:flutter_project/api/apiModel.dart';
+import 'package:flutter_project/api/apiService.dart';
 
 class EditAllowancePopup extends StatefulWidget {
   final AllowanceModel allowanceModel;
@@ -12,7 +12,7 @@ class EditAllowancePopup extends StatefulWidget {
 }
 
 class _EditPopupState extends State<EditAllowancePopup> {
-  final allowanceService = AllowanceService();
+  final apiService = ApiService();
   AllowanceModel? allowance;
 
   int? text1;
@@ -121,17 +121,14 @@ class _EditPopupState extends State<EditAllowancePopup> {
       actions: [
         TextButton(
           onPressed: () {
-            // Обработчик нажатия на кнопку отмены
-            Navigator.of(context).pop(); // Закрыть всплывающее окно
+            Navigator.of(context).pop();
           },
           child: Text("Отмена"),
         ),
         ElevatedButton(
           onPressed: () {
-            // Обработчик нажатия на кнопку сохранения
-            allowanceService.edit(
-                "token",
-                AllowanceModel(
+            apiService.editAllowance(
+                    AllowanceModel(
                     id: allowance!.id,
                     sum: text1,
                     dateOfSalary: date1,

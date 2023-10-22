@@ -34,7 +34,7 @@ class SalaryModel {
   final int? id;
   int? sum;
   DateTime? dateOfSalary;
-  int? numbOfOrder;
+  int? numberOfOrder;
   DateTime? dateOfOrder;
   int? employeeId;
 
@@ -42,7 +42,7 @@ class SalaryModel {
     required this.id,
     required this.sum,
     required this.dateOfSalary,
-    required this.numbOfOrder,
+    required this.numberOfOrder,
     required this.dateOfOrder,
     required this.employeeId,
   });
@@ -62,7 +62,7 @@ class PremiumModel {
   final int? id;
   int? sum;
   DateTime? dateOfSalary;
-  int? numbOfOrder;
+  int? numberOfOrder;
   DateTime? dateOfOrder;
   int? employeeId;
 
@@ -70,7 +70,7 @@ class PremiumModel {
     required this.id,
     required this.sum,
     required this.dateOfSalary,
-    required this.numbOfOrder,
+    required this.numberOfOrder,
     required this.dateOfOrder,
     required this.employeeId,
   });

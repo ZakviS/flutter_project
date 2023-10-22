@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/model/employeeModel.dart';
-import 'package:flutter_project/model/employeeResponse.dart';
-import 'package:flutter_project/model/employeeSearchModel.dart';
-import 'package:flutter_project/model/positionModel.dart';
-import 'package:flutter_project/service/employeeService.dart';
+import 'package:flutter_project/api/apiModel.dart';
+import 'package:flutter_project/api/apiService.dart';
 import 'package:flutter_project/service/positionService.dart';
 import 'package:flutter_project/pages/addEmployeeScreen.dart';
 
@@ -21,8 +18,8 @@ class Employee extends StatefulWidget {
 }
 
 class EmployeeState extends State<Employee> {
-  final employeeService = EmployeeService();
   final positionService = PositionService();
+  final apiService = ApiService();
   List<EmployeeModel> employeeList = [];
   List<PositionModel> positionList = [];
 
@@ -48,11 +45,7 @@ class EmployeeState extends State<Employee> {
     _scrollController.addListener(() {
       if (_scrollController.position.atEdge) {
         if (_scrollController.position.pixels == 0) {
-          // Верхний край списка
-          print("asd");
         } else {
-          // Нижний край списка
-          print("object");
           loadNextPage(
               page, "", hideDismissed); // Загрузка следующей страницы данных
         }
@@ -75,7 +68,7 @@ class EmployeeState extends State<Employee> {
 
 
       try {
-        EmployeeResponse newData = (await employeeService.searchEmployee(
+        EmployeeResponse newData = (await apiService.searchEmployee(
             EmployeeSearchModel(
                 surname: surname,
                 working: work,
@@ -83,7 +76,7 @@ class EmployeeState extends State<Employee> {
                 elementPerPage: 12,
                 direction: "dsc",
                 key:
-                    "surname"))) as EmployeeResponse;
+                    "surname")));
 
         setState(() {
           employeeList.addAll(
@@ -189,9 +182,7 @@ class EmployeeState extends State<Employee> {
                                         ),
                                         TextButton(
                                           onPressed: () {
-                                            // Вызов метода удаления после подтверждения
                                             print(employeeList[i].id);
-                                            // employeeService.delete(employeeList[i].id);
                                             Navigator.of(context)
                                                 .pop(); // Закрыть диалог
                                           },
@@ -230,7 +221,6 @@ class EmployeeState extends State<Employee> {
                                     ),
                                     TextButton(
                                       onPressed: () {
-                                        // Вызов метода удаления после подтверждения
                                         print(employeeList[i].id);
                                         Navigator.of(context)
                                             .pop(); // Закрыть диалог
@@ -264,7 +254,7 @@ class EmployeeState extends State<Employee> {
                 context,
                 MaterialPageRoute(
                     builder: (context) =>
-                        AddEmployee()), // SecondScreen - ваша целевая страница
+                        AddEmployee()),
               );
             },
             child: Icon(
