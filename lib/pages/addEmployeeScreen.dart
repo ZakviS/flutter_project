@@ -10,12 +10,11 @@ class AddEmployee extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
-    return AddEmployeeState();
+    return AddEmployeeScreen();
   }
 }
 
-class AddEmployeeState extends State<AddEmployee> {
+class AddEmployeeScreen extends State<AddEmployee> {
   final positionService = PositionService();
   final apiService = ApiService();
   List<PositionModel> positionList = [];
@@ -43,6 +42,26 @@ class AddEmployeeState extends State<AddEmployee> {
   DateTime? date2 = null;
 
   String dropdownValue = 'Опция 1';
+
+  void addEmployee(){
+    EmployeeModel employee = EmployeeModel(
+        id: null,
+        name: text1,
+        surname: text2,
+        secondSurname: text3,
+        beginning: date1,
+        dismissal: date2,
+        phoneNumber: text4,
+        email: text5,
+        positionId: 1);
+    apiService.addEmployee(employee);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              Employee()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -159,23 +178,7 @@ class AddEmployeeState extends State<AddEmployee> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  EmployeeModel employee = EmployeeModel(
-                      id: null,
-                      name: text1,
-                      surname: text2,
-                      secondSurname: text3,
-                      beginning: date1,
-                      dismissal: date2,
-                      phoneNumber: text4,
-                      email: text5,
-                      positionId: 1);
-                  apiService.addEmployee(employee);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            Employee()),
-                  );
+                  addEmployee();
                 },
                 child: Text('Отправить данные'),
               ),

@@ -3,7 +3,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_project/pages/employeeScreen.dart';
 import 'package:http/http.dart' as http;
 
-/// Flutter code sample for [AppBar].
 
 void main() => runApp(const AppBarApp());
 
@@ -25,6 +24,11 @@ class AppBarApp extends StatelessWidget {
 class AppBarExample extends StatelessWidget {
   const AppBarExample({super.key});
 
+  void routeToEmployee(BuildContext context){
+    Navigator.pushNamed(context, '/employee');
+    Future.delayed(Duration.zero, () {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final ButtonStyle style = TextButton.styleFrom(
@@ -42,36 +46,14 @@ class AppBarExample extends StatelessWidget {
                     actions: <Widget>[
                       TextButton(
                         style: style,
-                        onPressed: () async {
-                          final token =
-                              'MTY5NTU3MDUyNzMxOTo5ZGY5NzJhZTE2NGIwYmQxODdlMGYxOGM1NTA2ZDUyYTFkNjg2YWJlNGQ2NWJlMjQyMzU2ZDdjNTI2ZjM2ZTYwOnpha3ZpczEyMzQ1OjMzZDhkOGRmZGIzZDU4M2RiOTJmMTQxZjQzZWViNTFiNDY1YmY5OTdiZWFiNmFlZGE0ZmJjMDQ2YzNkMjk0ODFiYTI5ZmZkOGE4NGUwZGZiN2QwY2U3MWE1ODlmNGJhZDM1NmVhOWUzYWQ5MjQzYjY4Yzg0MWIyZmE3OWZmYzE4'; // Замените на ваш токен
-                          // final url = Uri.parse('http://localhost:8080/hello/admin');
-                          final url =
-                              Uri.parse('http://localhost:8080/premium/get/3');
-
-                          final response = await http.get(
-                            url,
-                            headers: {
-                              'Authorization': '$token',
-                            },
-                          );
-
-                          if (response.statusCode == 200) {
-                            // Обработка успешного ответа
-                            print('Response data: ${response.body}');
-                          } else {
-
-                            print(
-                                'Request failed with status: ${response.statusCode}');
-                          }
+                        onPressed: () {
                         },
                         child: const Text('Расчет'),
                       ),
                       TextButton(
                         style: style,
                         onPressed: () {
-                          Navigator.pushNamed(context, '/employee');
-                          Future.delayed(Duration.zero, () {});
+                          routeToEmployee(context);
                         },
                         child: const Text('Штат'),
                       ),

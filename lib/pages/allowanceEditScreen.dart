@@ -53,6 +53,26 @@ class _EditPopupState extends State<EditAllowancePopup> {
     }
   }
 
+  void saveAllowanceAndReturnResult(){
+    apiService.editAllowance(
+        AllowanceModel(
+            id: allowance!.id,
+            sum: text1,
+            dateOfSalary: date1,
+            numberOfOrder: text2,
+            dateOfOrder: date2,
+            employeeId: allowance?.employeeId),
+        5);
+    final result = AllowanceModel(
+        id: allowance!.id,
+        sum: text1,
+        dateOfSalary: date1,
+        numberOfOrder: text2,
+        dateOfOrder: date2,
+        employeeId: allowance?.employeeId);
+    Navigator.of(context).pop(result);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -127,23 +147,7 @@ class _EditPopupState extends State<EditAllowancePopup> {
         ),
         ElevatedButton(
           onPressed: () {
-            apiService.editAllowance(
-                    AllowanceModel(
-                    id: allowance!.id,
-                    sum: text1,
-                    dateOfSalary: date1,
-                    numberOfOrder: text2,
-                    dateOfOrder: date2,
-                    employeeId: allowance?.employeeId),
-                5);
-            final result = AllowanceModel(
-                id: allowance!.id,
-                sum: text1,
-                dateOfSalary: date1,
-                numberOfOrder: text2,
-                dateOfOrder: date2,
-                employeeId: allowance?.employeeId);
-            Navigator.of(context).pop(result);
+            saveAllowanceAndReturnResult();
           },
           child: Text("Сохранить"),
         ),

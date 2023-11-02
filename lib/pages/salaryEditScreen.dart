@@ -54,7 +54,25 @@ class _EditPopupState extends State<EditSalaryPopup> {
     }
   }
 
-
+  saveSalaryAnrReturnResult(){
+    apiService.editSalary(
+        SalaryModel(
+            id: salary!.id,
+            sum: text1,
+            dateOfSalary: date1,
+            numberOfOrder: text2,
+            dateOfOrder: date2,
+            employeeId: salary?.employeeId),
+        5);
+    final result = SalaryModel(
+        id: salary!.id,
+        sum: text1,
+        dateOfSalary: date1,
+        numberOfOrder: text2,
+        dateOfOrder: date2,
+        employeeId: salary?.employeeId);
+    Navigator.of(context).pop(result);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -130,23 +148,7 @@ class _EditPopupState extends State<EditSalaryPopup> {
         ),
         ElevatedButton(
           onPressed: () {
-            apiService.editSalary(
-                SalaryModel(
-                    id: salary!.id,
-                    sum: text1,
-                    dateOfSalary: date1,
-                    numberOfOrder: text2,
-                    dateOfOrder: date2,
-                    employeeId: salary?.employeeId),
-                5);
-            final result = SalaryModel(
-                id: salary!.id,
-                sum: text1,
-                dateOfSalary: date1,
-                numberOfOrder: text2,
-                dateOfOrder: date2,
-                employeeId: salary?.employeeId);
-            Navigator.of(context).pop(result);
+            saveSalaryAnrReturnResult();
           },
           child: Text("Сохранить"),
         ),

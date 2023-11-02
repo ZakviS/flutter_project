@@ -104,15 +104,12 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
   }
 
   Future<void> fetchDataAndPrintName() async {
-
     positionList.clear();
-
     setState(() {
       positionList.addAll(positionService.getPositionList());
     });
 
     final employee = this.employee;
-
 
     allowanceList = await apiService.getAllowance(employee?.id);
     salaryList =  await apiService.getSalary(employee?.id);
@@ -129,13 +126,172 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
     }
   }
 
-  void deleteAllowanceAndUpdateScreen(int? allowanceId) {
-    // Выполните удаление элемента из списка
-    allowanceList.removeWhere((allowance) => allowance.id == allowanceId);
 
-    // Вызов setState, чтобы перерисовать экран
-    setState(() {});
+
+  void routeToEmployee(){
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              Employee()),
+    );
   }
+
+  void sendEmployee(){
+    EmployeeModel employee = EmployeeModel(
+        id: this.employee?.id,
+        name: text1,
+        surname: text2,
+        secondSurname: text3,
+        beginning: date1,
+        dismissal: date2,
+        phoneNumber: text4,
+        email: text5,
+        positionId: selectedPosition!.id);
+    apiService.editEmployee( employee, 5);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              Employee()),
+    );
+  }
+
+  void addSalary(){
+    SalaryModel salaryModel = SalaryModel(
+        id: null,
+        sum: int.tryParse(salarySum),
+        dateOfSalary: dateOfSalary,
+        numberOfOrder: int.tryParse(salaryNumb),
+        dateOfOrder: dateOfSalOrder,
+        employeeId: employee?.id);
+    apiService.addSalary(salaryModel);
+    setState(() {
+      salaryList.add(salaryModel);
+    });
+
+  }
+
+  Future<void> openSalaryEditAndSave(SalaryModel salary) async {
+    final SalaryModel result = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return EditSalaryPopup(salaryModel: salary);
+      },
+    );
+    if (result != null) {
+      setState(() {
+        salary.sum = result.sum;
+        salary.numberOfOrder = result.numberOfOrder;
+        salary.dateOfSalary = result.dateOfSalary;
+        salary.dateOfOrder = result.dateOfOrder;
+      });
+    }
+  }
+
+  void deleteSalaryAndUpdateScreen(int? salaryId) {
+    salaryList.removeWhere((salary) => salary.id == salaryId);
+    setState(() {salaryList;});
+  }
+
+  void deleteSalary(salary){
+    apiService.deleteSalary(salary.id);
+    deleteSalaryAndUpdateScreen(salary.id);
+  }
+
+  void addPremium(){
+    PremiumModel premiumModel =  PremiumModel(
+        id: null,
+        sum: int.tryParse(premiumSum),
+        dateOfSalary: dateOfPremium,
+        numberOfOrder: int.tryParse(premiumNumb),
+        dateOfOrder: dateOfPremOrder,
+        employeeId: employee?.id);
+    apiService.addPremium(premiumModel);
+    setState(() {
+      premiumList.add(premiumModel);
+    });
+
+  }
+
+  Future<void> openPremiumEditAndSave(PremiumModel premium) async {
+    final PremiumModel result = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return EditPremiumPopup(premiumModel: premium);
+      },
+    );
+    if (result != null) {
+      setState(() {
+        premium.sum = result.sum;
+        premium.numberOfOrder = result.numberOfOrder;
+        premium.dateOfSalary =
+            result.dateOfSalary;
+        premium.dateOfOrder = result.dateOfOrder;
+
+      });
+    }
+  }
+
+  void deletePremiumAndUpdateScreen(int? premiumId) {
+    premiumList.removeWhere((premium) => premium.id == premiumId);
+    setState(() {premiumList;});
+  }
+
+  void deletePremium(premium){
+    apiService.deletePremium(premium.id);
+    deletePremiumAndUpdateScreen(premium.id);
+  }
+
+
+  void addAllowance(){
+    AllowanceModel allowanceModel = AllowanceModel(
+        id: null,
+        sum: int.tryParse(allowanceSum),
+        dateOfSalary: dateOfAllowance,
+        numberOfOrder: int.tryParse(allowanceNumb),
+        dateOfOrder: dateOfAllowOrder,
+        employeeId: employee?.id);
+    apiService.addAllowance(allowanceModel);
+    setState(() {
+      allowanceList.add(allowanceModel);
+    });
+
+
+  }
+
+  Future<void> openAllowanceEditAndSave(AllowanceModel allowance) async {
+    final AllowanceModel result = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return EditAllowancePopup(
+            allowanceModel: allowance /*employee?.id,*/);
+      },
+    );
+    if (result != null) {
+      setState(() {
+        allowance.sum = result.sum;
+        allowance.numberOfOrder =
+            result.numberOfOrder;
+        allowance.dateOfSalary =
+            result.dateOfSalary;
+        allowance.dateOfOrder =
+            result.dateOfOrder;
+
+      });
+    }
+  }
+
+  void deleteAllowanceAndUpdateScreen(int? allowanceId) {
+    allowanceList.removeWhere((allowance) => allowance.id == allowanceId);
+    setState(() {allowanceList;});
+  }
+
+  void deleteAllowance(allowance){
+    apiService.deleteAllowance(allowance.id);
+    deleteAllowanceAndUpdateScreen(allowance.id);
+  }
+
 
 
   @override
@@ -159,7 +315,6 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
           padding: const EdgeInsets.all(16.0),
           child: ListView(
             children: [
-              // Поле ввода текста 1
               TextFormField(
                 controller: nameController,
                 onChanged: (value) {
@@ -169,7 +324,6 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
                 },
                 decoration: InputDecoration(labelText: 'Имя'),
               ),
-              // Поле ввода текста 2
               TextFormField(
                 controller: surnameController,
                 onChanged: (value) {
@@ -179,7 +333,6 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
                 },
                 decoration: InputDecoration(labelText: 'Фамилия'),
               ),
-              // Поле ввода текста 3
               TextFormField(
                 controller: secondSurnameController,
                 onChanged: (value) {
@@ -189,7 +342,6 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
                 },
                 decoration: InputDecoration(labelText: 'Отчество'),
               ),
-              // Поле ввода текста 4
               TextFormField(
                 controller: phoneNumberController,
                 onChanged: (value) {
@@ -199,7 +351,6 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
                 },
                 decoration: InputDecoration(labelText: 'Телефон'),
               ),
-              // Поле ввода текста 5
               TextFormField(
                 controller: emailController,
                 onChanged: (value) {
@@ -209,19 +360,15 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
                 },
                 decoration: InputDecoration(labelText: 'Email'),
               ),
-              // Поле выбора даты 1
               ListTile(
                 title: Text('Дата принятия'),
                 subtitle: TextFormField(
                   controller: beginningFieldController,
-                  // Свяжите контроллер с TextFormField
                   onChanged: (value) {
-                    // Обработка изменений в текстовом поле, если необходимо
                   },
                   decoration: InputDecoration(
                     hintText: '${date1.toLocal()}'
-                        .split(' ')[0], // Начальное значение или подсказка
-                    // Другие настройки внешнего вида, если необходимо
+                        .split(' ')[0],
                   ),
                 ),
                 trailing: Icon(Icons.keyboard_arrow_down),
@@ -238,19 +385,15 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
                     });
                 },
               ),
-              // Поле выбора даты 2
               ListTile(
                 title: Text('Дата увольнения'),
                 subtitle: TextFormField(
                   controller: dismissalFieldController,
-                  // Свяжите контроллер с TextFormField
                   onChanged: (value) {
-                    // Обработка изменений в текстовом поле, если необходимо
                   },
                   decoration: InputDecoration(
                     hintText: '${date2?.toLocal()}'
-                        .split(' ')[0], // Начальное значение или подсказка
-                    // Другие настройки внешнего вида, если необходимо
+                        .split(' ')[0],
                   ),
                 ),
                 trailing: Icon(Icons.keyboard_arrow_down),
@@ -270,13 +413,10 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
               // Выпадающий список
               DropdownButton<PositionModel>(
                 value: selectedPosition,
-
                 onChanged: (PositionModel? newValue) {
                   if (newValue != null && newValue != positionService.getPosition(employee!.positionId)) {
-                    print(newValue.name);
                     setState(() {
                       selectedPosition = newValue;
-                      print(selectedPosition?.name);
                     });
                   }
                 },
@@ -294,12 +434,7 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                Employee()),
-                      );
+                      routeToEmployee();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey,
@@ -309,24 +444,7 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
                   SizedBox(width: 30),
                   ElevatedButton(
                     onPressed: () {
-
-                      EmployeeModel employee = EmployeeModel(
-                          id: this.employee?.id,
-                          name: text1,
-                          surname: text2,
-                          secondSurname: text3,
-                          beginning: date1,
-                          dismissal: date2,
-                          phoneNumber: text4,
-                          email: text5,
-                          positionId: selectedPosition!.id);
-                      apiService.editEmployee( employee, 5);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                Employee()),
-                      );
+                      sendEmployee();
                     },
                     child: Text('Отправить данные'),
                   ),
@@ -433,27 +551,12 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  apiService.addSalary(
-                          SalaryModel(
-                          id: null,
-                          sum: int.tryParse(salarySum),
-                          dateOfSalary: dateOfSalary,
-                          numberOfOrder: int.tryParse(salaryNumb),
-                          dateOfOrder: dateOfSalOrder,
-                          employeeId: employee?.id));
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            Employee()),
-                  );
+                  addSalary();
                 },
                 child: Text('Отправить данные'),
               ),
               PopupMenuButton<String>(
                 onSelected: (String value) {
-
                 },
                 itemBuilder: (BuildContext context) {
                   return salaryList.map((SalaryModel salary) {
@@ -469,27 +572,13 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
                               IconButton(
                                 icon: Icon(Icons.edit),
                                 onPressed: () async {
-                                  final SalaryModel result = await showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return EditSalaryPopup(salaryModel: salary);
-                                    },
-                                  );
-                                  if (result != null) {
-                                    setState(() {
-                                      salary.sum = result.sum;
-                                      salary.numberOfOrder = result.numberOfOrder;
-                                      salary.dateOfSalary = result.dateOfSalary;
-                                      salary.dateOfOrder = result.dateOfOrder;
-
-                                      // ... остальные данные ...
-                                    });
-                                  }
+                                  openSalaryEditAndSave(salary);
                                 },
                               ),
                               IconButton(
-                                icon: Icon(Icons.delete), // Кнопка удаления
+                                icon: Icon(Icons.delete),
                                 onPressed: () {
+                                  deleteSalary(salary);
                                 },
                               ),
                             ],
@@ -601,27 +690,7 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  print('Имя: $premiumSum');
-                  print('Фамилия: $premiumNumb');
-                  print('Отчество: $dateOfPremium');
-                  print('Телефон: $dateOfPremOrder');
-
-                  apiService.addPremium(
-                      PremiumModel(
-                          id: null,
-                          sum: int.tryParse(premiumSum),
-                          dateOfSalary: dateOfPremium,
-                          numberOfOrder: int.tryParse(premiumNumb),
-                          dateOfOrder: dateOfPremOrder,
-                          employeeId: employee?.id));
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            Employee()),
-                  );
-
+                  addPremium();
                 },
                 child: Text('Отправить данные'),
               ),
@@ -642,27 +711,13 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
                               IconButton(
                                 icon: Icon(Icons.edit),
                                 onPressed: () async {
-                                  final PremiumModel result = await showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return EditPremiumPopup(premiumModel: premium);
-                                    },
-                                  );
-                                  if (result != null) {
-                                    setState(() {
-                                      premium.sum = result.sum;
-                                      premium.numberOfOrder = result.numberOfOrder;
-                                      premium.dateOfSalary =
-                                          result.dateOfSalary;
-                                      premium.dateOfOrder = result.dateOfOrder;
-
-                                    });
-                                  }
+                                  openPremiumEditAndSave(premium);
                                 },
                               ),
                               IconButton(
                                 icon: Icon(Icons.delete),
                                 onPressed: () {
+                                  deletePremium(premium);
                                 },
                               ),
                             ],
@@ -672,10 +727,9 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
                     );
                   }).toList();
                 },
-                child: Text("Посмотреть историю"), // Текст кнопки
+                child: Text("Посмотреть историю"),
               ),
 
-              //allowance
               SizedBox(height: 30),
               const Text(
                 "Надбавка",
@@ -776,21 +830,7 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  apiService.addAllowance(
-                          AllowanceModel(
-                          id: null,
-                          sum: int.tryParse(allowanceSum),
-                          dateOfSalary: dateOfAllowance,
-                          numberOfOrder: int.tryParse(allowanceNumb),
-                          dateOfOrder: dateOfAllowOrder,
-                          employeeId: employee?.id));
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            Employee()),
-                  );
+                  addAllowance();
                 },
                 child: Text('Отправить данные'),
               ),
@@ -811,35 +851,13 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
                               IconButton(
                                 icon: Icon(Icons.edit),
                                 onPressed: () async {
-                                  final AllowanceModel result = await showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return EditAllowancePopup(
-                                          allowanceModel: allowance /*employee?.id,*/);
-                                    },
-                                  );
-                                  if (result != null) {
-
-                                    setState(() {
-
-                                      allowance.sum = result.sum;
-                                      allowance.numberOfOrder =
-                                          result.numberOfOrder;
-                                      allowance.dateOfSalary =
-                                          result.dateOfSalary;
-                                      allowance.dateOfOrder =
-                                          result.dateOfOrder;
-
-                                    });
-                                  }
+                                  openAllowanceEditAndSave(allowance);
                                 },
                               ),
                               IconButton(
-                                icon: Icon(Icons.delete), // Кнопка удаления
+                                icon: Icon(Icons.delete),
                                 onPressed: () async {
-                                  apiService.deleteAllowance(allowance.id);
-                                  deleteAllowanceAndUpdateScreen(allowance.id);
-
+                                  deleteAllowance(allowance);
                                 },
                               ),
                             ],
@@ -849,7 +867,7 @@ class EditEmployeeState extends State<EditEmployeeScreen> {
                     );
                   }).toList();
                 },
-                child: Text("Посмотреть историю"), // Текст кнопки
+                child: Text("Посмотреть историю"),
               )
             ],
           ),

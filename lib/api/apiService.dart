@@ -23,7 +23,8 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      return EmployeeResponse.fromJson(json.decode(response.body));
+      return EmployeeResponse.fromJson(json.decode(utf8.decode(response.bodyBytes)));
+
     } else {
       throw Exception('Failed to load employee response');
     }
@@ -97,7 +98,7 @@ class ApiService {
 
     if (response.statusCode == 200) {
       return response.body;
-      // print('Response data: ${response.body}');
+
     } else {
       throw Exception('Request failed with status: ${response.statusCode}');
     }
@@ -153,7 +154,7 @@ class ApiService {
     if (response.statusCode == 201) {
       return response.body;
     } else {
-      // print('Request failed with status: ${response.statusCode}');
+
       throw Exception('Request failed with status: ${response.statusCode}');
     }
   }

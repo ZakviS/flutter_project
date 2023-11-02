@@ -12,7 +12,6 @@ class Employee extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return EmployeeState();
   }
 }
@@ -29,7 +28,7 @@ class EmployeeState extends State<Employee> {
 
   final ScrollController _scrollController = ScrollController();
 
-  // EmployeeSearchModel
+
   int page = 0;
   bool isLoading = false;
 
@@ -47,7 +46,7 @@ class EmployeeState extends State<Employee> {
         if (_scrollController.position.pixels == 0) {
         } else {
           loadNextPage(
-              page, "", hideDismissed); // Загрузка следующей страницы данных
+              page, "", hideDismissed);
         }
       }
     });
@@ -90,6 +89,48 @@ class EmployeeState extends State<Employee> {
         isLoading = false;
       }
     }
+  }
+
+  void openDeleteScreen(int? id){
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Подтвердите удаление'),
+          content: Text(
+              'Вы уверены, что хотите удалить этого сотрудника?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .pop();
+
+              },
+              child: Text('Отмена'),
+            ),
+            TextButton(
+              onPressed: () {
+                apiService.deleteEmployee(id);
+                Navigator.of(context)
+                    .pop();
+              },
+              child: Text('Удалить'),
+            ),
+          ],
+        );
+      },
+    );
+    employeeList.removeWhere((employee) => employee.id == id);
+      setState(() {employeeList;});
+  }
+
+  void routToAddEmployee(){
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              AddEmployee()),
+    );
   }
 
   Future<void> fetchDataAndPrintName() async {
@@ -137,7 +178,6 @@ class EmployeeState extends State<Employee> {
                 onChanged: (newValue) {
                   setState(() {
                     hideDismissed = newValue!;
-                    print(hideDismissed);
                     employeeList.clear();
                     page = 0;
                     loadNextPage(page, searchController.text, hideDismissed);
@@ -164,73 +204,14 @@ class EmployeeState extends State<Employee> {
                                 color: Colors.red,
                               ),
                               onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text('Подтвердите удаление'),
-                                      content: Text(
-                                          'Вы уверены, что хотите удалить этого сотрудника?'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context)
-                                                .pop(); // Закрыть диалог
-
-                                          },
-                                          child: Text('Отмена'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            print(employeeList[i].id);
-                                            Navigator.of(context)
-                                                .pop(); // Закрыть диалог
-                                          },
-                                          child: Text('Удалить'),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
+                                openDeleteScreen(employeeList[i].id);
                               },
                             ),
                           ),
                         ),
                         onDismissed: (direction) {
                           if (direction == DismissDirection.endToStart) {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text('Подтвердите удаление'),
-                                  content: Text(
-                                      'Вы уверены, что хотите удалить этого сотрудника?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context)
-                                            .pop();
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  Employee()),
-                                        );
-                                      },
-                                      child: Text('Отмена'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        print(employeeList[i].id);
-                                        Navigator.of(context)
-                                            .pop(); // Закрыть диалог
-                                      },
-                                      child: Text('Удалить'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
+                            openDeleteScreen(employeeList[i].id);
                           } else {
                             Navigator.push(
                               context,
@@ -242,7 +223,7 @@ class EmployeeState extends State<Employee> {
                           }
                         },
                       );
-                    } //item
+                    }
                     ),
               ),
             ],
@@ -250,12 +231,7 @@ class EmployeeState extends State<Employee> {
           floatingActionButton: FloatingActionButton(
             backgroundColor: Colors.blue,
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        AddEmployee()),
-              );
+              routToAddEmployee();
             },
             child: Icon(
               Icons.add,

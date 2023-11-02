@@ -42,7 +42,6 @@ class _EditPopupState extends State<EditPremiumPopup> {
       date2 = premium.dateOfOrder;
     }
     initFields();
-    // fetchDataAndPrintName();
   }
 
   Future<void> initFields() async {
@@ -54,6 +53,26 @@ class _EditPopupState extends State<EditPremiumPopup> {
           '${premium!.dateOfSalary?.toLocal()}'.split(' ')[0];
       date2Controller.text = '${premium!.dateOfOrder?.toLocal()}'.split(' ')[0];
     }
+  }
+
+  void savePremiumAnrReturnResult(){
+    apiService.editPremium(
+        PremiumModel(
+            id: premium!.id,
+            sum: text1,
+            dateOfSalary: date1,
+            numberOfOrder: text2,
+            dateOfOrder: date2,
+            employeeId: premium?.employeeId),
+        5);
+    final result = PremiumModel(
+        id: premium!.id,
+        sum: text1,
+        dateOfSalary: date1,
+        numberOfOrder: text2,
+        dateOfOrder: date2,
+        employeeId: premium?.employeeId);
+    Navigator.of(context).pop(result);
   }
 
   
@@ -132,23 +151,7 @@ class _EditPopupState extends State<EditPremiumPopup> {
         ),
         ElevatedButton(
           onPressed: () {
-            apiService.editPremium(
-                PremiumModel(
-                    id: premium!.id,
-                    sum: text1,
-                    dateOfSalary: date1,
-                    numberOfOrder: text2,
-                    dateOfOrder: date2,
-                    employeeId: premium?.employeeId),
-                5);
-            final result = PremiumModel(
-                id: premium!.id,
-                sum: text1,
-                dateOfSalary: date1,
-                numberOfOrder: text2,
-                dateOfOrder: date2,
-                employeeId: premium?.employeeId);
-            Navigator.of(context).pop(result);
+            savePremiumAnrReturnResult();
           },
           child: Text("Сохранить"),
         ),
